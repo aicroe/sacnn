@@ -4,17 +4,27 @@ from gensim.models import KeyedVectors
 import numpy as np
 import pandas as pd
 
+
 def load_embedding(path):
-    # other word2vecs binaries are loaded as: 
+    # other word2vecs binaries are loaded as:
     # from gensim.models import Word2Vec
     # Word2Vec.load(...)
     return KeyedVectors.load_word2vec_format(path, binary=True)
 
+
 def clean_str(dirty_word):
     return re.sub(r'[\.,\-"\{\}\[\]\*\^;%\+&°!¡¿?#<>@/\(\)\\=:_~]', '', dirty_word.lower())
 
-def process_comments(word_to_vector, comments_values, samples_count, sentence_length, word_dimension, channels):
-    samples = np.empty((samples_count, sentence_length, word_dimension, channels), dtype=np.float32)
+
+def process_comments(
+        word_to_vector,
+        comments_values,
+        samples_count,
+        sentence_length,
+        word_dimension,
+        channels):
+    samples = np.empty((samples_count, sentence_length,
+                        word_dimension, channels), dtype=np.float32)
     for sample_index in range(samples_count):
         comment = comments_values[sample_index].split()
         sample = np.zeros((sentence_length, word_dimension, 1))
@@ -32,6 +42,7 @@ def process_comments(word_to_vector, comments_values, samples_count, sentence_le
         samples[sample_index] = sample
     return samples
 
+
 def create_1vec_labels(labels, labels_values):
     amount_samples = labels_values.shape[0]
     onevec_labels = np.zeros((amount_samples, len(labels)), dtype=np.float32)
@@ -39,14 +50,19 @@ def create_1vec_labels(labels, labels_values):
         onevec_labels[index, labels.index(labels_values[index])] = 1
     return onevec_labels
 
-## Load the comments
 
 def load_comments(comments_path):
     types = {
         'rating': np.int32,
         'fullContent': np.str
     }
-    comments_frame = pd.read_csv(comments_path, sep=',', header=0, encoding='utf-8', usecols=list(types.keys()), dtype=types)
+    comments_frame = pd.read_csv(
+        comments_path,
+        sep=',',
+        header=0,
+        encoding='utf-8',
+        usecols=list(types.keys()),
+        dtype=types)
 
     comments_rating_1 = comments_frame[comments_frame['rating'] == 1][0:50]
     comments_rating_2 = comments_frame[comments_frame['rating'] == 2][0:50]
@@ -60,8 +76,14 @@ def load_comments(comments_path):
     print('comments rating=4: %d' % comments_rating_4.shape[0])
     print('comments rating=5: %d' % comments_rating_5.shape[0])
 
-    comments_frame = pd.concat([comments_rating_1, comments_rating_2, comments_rating_3, comments_rating_4, comments_rating_5], ignore_index=True)
+    comments_frame = pd.concat([
+        comments_rating_1,
+        comments_rating_2,
+        comments_rating_3,
+        comments_rating_4,
+        comments_rating_5], ignore_index=True)
     return comments_frame
+
 
 if __name__ == '__main__':
     EMBEDDING_PATH = 'raw/SBW-vectors-300-min5.bin'
@@ -69,7 +91,7 @@ if __name__ == '__main__':
     sentence_length = 100
     channels = 1
     raw_labels = [1, 2, 3, 4, 5]
-    
+
     print('loading embedding')
     embedding = load_embedding(EMBEDDING_PATH)
     print('loading comments')
@@ -82,10 +104,16 @@ if __name__ == '__main__':
     comments_frame = comments_frame.iloc[np.random.permutation(samples_count)].reset_index(drop=True)
 
     print('processing comments')
-    samples = process_comments(embedding.wv, comments_frame['fullContent'], samples_count, sentence_length, word_dimension, channels)
+    samples = process_comments(
+        embedding.wv,
+        comments_frame['fullContent'],
+        samples_count,
+        sentence_length,
+        word_dimension,
+        channels)
     onevec_labels = create_1vec_labels(raw_labels, comments_frame['rating'])
 
-    ## Preparation
+    # Preparation
     assert samples.shape[0] == onevec_labels.shape[0]
     seventy_percent = math.floor(samples.shape[0] * 0.75)
     fifteen_percent = math.floor(samples.shape[0] * 0.15)
@@ -102,7 +130,7 @@ if __name__ == '__main__':
     print('test dataset shape: ({}, {})'.format(*test_dataset.shape))
     print('test labels shape: ({}, {})'.format(*test_labels.shape))
 
-    ## Save
+    # Save
     np.save('data/train_dataset', train_dataset)
     np.save('data/test_dataset', train_labels)
     np.save('data/val_dataset', val_dataset)
