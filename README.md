@@ -12,9 +12,9 @@ Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the embe
 
 Place the raw data inside the raw folder, if doesn't exists create it.
 
-It is looked for a _comments.csv_ file.
+It is expected a file called _comments.csv_.
 
-It is looked for a embedding bin called _SBW-vectors-300-min5.bin_.
+It is expected a embedding binary called _SBW-vectors-300-min5.bin_.
 
 ## Preprocess data
 
@@ -25,3 +25,23 @@ $ python process_data.py
 ```
 
 It will place the train, validation and test data in the _data_ folder.
+
+## Train the network
+
+Run the script:
+
+```bash
+$ python train.py
+```
+
+It reads the data saved at _data_ in order to train the network. Saves the trained parameters in the _data_ folder.
+
+## Evaluate
+
+Run the script:
+
+```bash
+$ python eval.py
+```
+
+It reads the trained parameters and evaluates over the test data.
