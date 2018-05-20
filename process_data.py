@@ -3,6 +3,7 @@ import math
 from gensim.models import KeyedVectors
 import numpy as np
 import pandas as pd
+from model import DataManager
 
 
 def load_embedding(path):
@@ -84,8 +85,7 @@ def load_comments(comments_path):
         comments_rating_5], ignore_index=True)
     return comments_frame
 
-
-if __name__ == '__main__':
+def _main():
     EMBEDDING_PATH = 'raw/SBW-vectors-300-min5.bin'
     COMMENTS_PATH = 'raw/comments.csv'
     sentence_length = 100
@@ -117,24 +117,29 @@ if __name__ == '__main__':
     assert samples.shape[0] == onevec_labels.shape[0]
     seventy_percent = math.floor(samples.shape[0] * 0.75)
     fifteen_percent = math.floor(samples.shape[0] * 0.15)
-    train_dataset = samples[:seventy_percent, :]
-    train_labels = onevec_labels[:seventy_percent, :]
-    val_dataset = samples[seventy_percent:seventy_percent + fifteen_percent, :]
-    val_labels = onevec_labels[seventy_percent:seventy_percent + fifteen_percent, :]
-    test_dataset = samples[seventy_percent + fifteen_percent:, :]
-    test_labels = onevec_labels[seventy_percent + fifteen_percent:, :]
-    print('train dataset shape: ({}, {})'.format(*train_dataset.shape))
+    train_dataset = samples[:seventy_percent]
+    train_labels = onevec_labels[:seventy_percent]
+    val_dataset = samples[seventy_percent:seventy_percent + fifteen_percent]
+    val_labels = onevec_labels[seventy_percent:seventy_percent + fifteen_percent]
+    test_dataset = samples[seventy_percent + fifteen_percent:]
+    test_labels = onevec_labels[seventy_percent + fifteen_percent:]
+    print('train dataset shape: ({}, {}, {}, {})'.format(*train_dataset.shape))
     print('train labels shape: ({}, {})'.format(*train_labels.shape))
-    print('val dataset shape: ({}, {})'.format(*val_dataset.shape))
+    print('val dataset shape: ({}, {}, {}, {})'.format(*val_dataset.shape))
     print('val labels shape: ({}, {})'.format(*val_labels.shape))
-    print('test dataset shape: ({}, {})'.format(*test_dataset.shape))
+    print('test dataset shape: ({}, {}, {}, {})'.format(*test_dataset.shape))
     print('test labels shape: ({}, {})'.format(*test_labels.shape))
 
     # Save
-    np.save('data/train_dataset', train_dataset)
-    np.save('data/test_dataset', train_labels)
-    np.save('data/val_dataset', val_dataset)
-    np.save('data/val_labels', val_labels)
-    np.save('data/test_dataset', test_dataset)
-    np.save('data/test_labels', test_labels)
-    print('datasets saved at data/')
+    DataManager.save_data(
+        train_dataset,
+        train_labels,
+        val_dataset,
+        val_labels,
+        test_dataset,
+        test_labels)
+    print('train and test data saved at data/')
+
+
+if __name__ == '__main__':
+    _main()
