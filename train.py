@@ -86,7 +86,7 @@ class SACNN(object):
               val_labels,
               minibatch_size,
               epochs,
-              print_costs=True):
+              epoch_print_cost=0):
         costs = []
         val_costs = []
         num_minibatches = math.ceil(train_dataset.shape[0] / minibatch_size)
@@ -106,7 +106,7 @@ class SACNN(object):
                 minibatch_accuarcy += accuracy(train_predictions, minibatch_labels) / num_minibatches
             #if (minibatch_cost < 10):
             costs.append(minibatch_cost)
-            if print_costs and epoch % 10 == 0:
+            if epoch_print_cost > 0 and epoch % epoch_print_cost == 0:
                 print('--------epoch: %d-------' % epoch)
                 print('cost over training set: %f' % minibatch_cost)
                 print('accuarcy over training set: %f' % minibatch_accuarcy)
@@ -138,14 +138,12 @@ def _main():
     _, sentence_length, word_dimension, channels = train_dataset.shape
     raw_labels = [1, 2, 3, 4, 5]
 
-    epochs = 11  # 121 #181 #251 #151
-    minibatch_size = 32
-    learning_rate = 0.009
     filter_size = 5
     depth = 64 #16 #100
     pool_stride = 5
     hidden_units = 128
     keep_prob = 0.5
+    learning_rate = 0.009
 
     model = SACNN(
         sentence_length,
@@ -167,6 +165,10 @@ def _main():
     init = tf.global_variables_initializer()
     session.run(init)
 
+    epochs = 11  # 121 #181 #251 #151
+    minibatch_size = 32
+    epoch_print_cost = 1
+
     costs, val_costs = model.train(
         session,
         train_dataset,
@@ -174,11 +176,12 @@ def _main():
         val_dataset,
         val_labels,
         minibatch_size,
-        epochs)
+        epochs,
+        epoch_print_cost)
 
     plt.plot(
         [x for x in range(len(costs))], costs, 'b', 
-        [x * 10 for x in range((len(val_costs)))], val_costs, 'r')
+        [x * epoch_print_cost for x in range((len(val_costs)))], val_costs, 'r')
     plt.ylabel('cost')
     plt.xlabel('iterations')
     plt.title('Learning rate = %d' % learning_rate)
