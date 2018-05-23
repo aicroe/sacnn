@@ -13,25 +13,19 @@ def _main():
     (layer1_filters,
     layer1_biases,
     layer2_weights,
-    layer2_biases,
-    layer3_weights,
-    layer3_biases) = DataManager.load_parameters()
+    layer2_biases) = DataManager.load_parameters()
 
     parameters = Parameters(
         tf.constant(layer1_filters),
         tf.constant(layer1_biases),
         tf.constant(layer2_weights),
-        tf.constant(layer2_biases),
-        tf.constant(layer3_weights),
-        tf.constant(layer3_biases))
+        tf.constant(layer2_biases))
 
-    filter_size = 5
-    pool_stride = 5
+    filter_heigth, filter_width, _, _ = layer1_filters.shape
 
     hparameters = HyperParameters(
-        filter_size,
-        filter_size,
-        pool_stride,
+        filter_heigth,
+        filter_width,
         learning_rate=0)
     
     model = SACNNBase(

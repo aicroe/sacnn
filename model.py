@@ -7,26 +7,20 @@ class Parameters(object):
                  layer1_filters,
                  layer1_biases,
                  layer2_weights,
-                 layer2_biases,
-                 layer3_weights,
-                 layer3_biases):
+                 layer2_biases):
         self.layer1_filters = layer1_filters
         self.layer1_biases = layer1_biases
         self.layer2_weights = layer2_weights
         self.layer2_biases = layer2_biases
-        self.layer3_weights = layer3_weights
-        self.layer3_biases = layer3_biases
 
 
 class HyperParameters(object):
     def __init__(self,
                  filter_heigth,
-                 filter_weight,
-                 pool_stride,
+                 filter_width,
                  learning_rate):
         self.filter_heigth = filter_heigth
-        self.filter_weight = filter_weight
-        self.pool_stride = pool_stride
+        self.filter_width = filter_width
         self.learning_rate = learning_rate
 
 
@@ -42,35 +36,34 @@ class SACNNBase(object):
         layer1_biases = self.parameters.layer1_biases
         layer2_weights = self.parameters.layer2_weights
         layer2_biases = self.parameters.layer2_biases
-        layer3_weights = self.parameters.layer3_weights
-        layer3_biases = self.parameters.layer3_biases
 
         filter_heigth = self.hparameters.filter_heigth
-        filter_weight = self.hparameters.filter_weight
-        pool_stride = self.hparameters.pool_stride
+        filter_width = self.hparameters.filter_width
         learning_rate = self.hparameters.learning_rate
+
+        _, sentence_length, word_dimension, _ = self.dataset.get_shape().as_list()
+
+        assert filter_width == word_dimension
 
         layer1_conv = tf.nn.conv2d(
             self.dataset,
             layer1_filters,
             strides=[1, 1, 1, 1],
-            padding='SAME')
+            padding='VALID')
         layer1_activation = tf.nn.relu(layer1_conv + layer1_biases)
         layer1_pooling = tf.nn.max_pool(
             layer1_activation,
-            [1, filter_heigth, filter_weight, 1],
-            strides=[1, pool_stride, pool_stride, 1],
+            [1, sentence_length - filter_heigth + 1, 1, 1],
+            strides=[1, 1, 1, 1],
             padding='VALID')
-        shape = layer1_pooling.get_shape().as_list()
-        layer1_reshape = tf.reshape(layer1_pooling, [-1, shape[1] * shape[2] * shape[3]])
+        pool_res_shape = layer1_pooling.get_shape().as_list()
+        layer1_reshape = tf.reshape(layer1_pooling, [-1, pool_res_shape[1] * pool_res_shape[2] * pool_res_shape[3]])
         layer1_dropout = tf.nn.dropout(layer1_reshape, self.keep_prob)
         layer2_linear = tf.matmul(layer1_dropout, layer2_weights) + layer2_biases
-        layer2_activation = tf.nn.relu(layer2_linear)
-        layer3_linear = tf.matmul(layer2_activation, layer3_weights) + layer3_biases
-        self.prediction = tf.nn.softmax(layer3_linear)
+        self.prediction = tf.nn.softmax(layer2_linear)
 
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
-            logits=layer3_linear, labels=self.labels))
+            logits=layer2_linear, labels=self.labels))
         if learning_rate != 0:
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)
 
@@ -90,15 +83,11 @@ class DataManager(object):
     def save_parameters(layer1_filters,
                         layer1_biases,
                         layer2_weights,
-                        layer2_biases,
-                        layer3_weights,
-                        layer3_biases):
+                        layer2_biases):
         np.save('data/layer1_filters.npy', layer1_filters)
         np.save('data/layer1_biases.npy', layer1_biases)
         np.save('data/layer2_weights.npy', layer2_weights)
         np.save('data/layer2_biases.npy', layer2_biases)
-        np.save('data/layer3_weights.npy', layer3_weights)
-        np.save('data/layer3_biases.npy', layer3_biases)
 
     @staticmethod
     def load_train_data():
@@ -122,6 +111,4 @@ class DataManager(object):
         layer1_biases = np.load('data/layer1_biases.npy')
         layer2_weights = np.load('data/layer2_weights.npy')
         layer2_biases = np.load('data/layer2_biases.npy')
-        layer3_weights = np.load('data/layer3_weights.npy')
-        layer3_biases = np.load('data/layer3_biases.npy')
-        return layer1_filters, layer1_biases, layer2_weights, layer2_biases, layer3_weights, layer3_biases
+        return layer1_filters, layer1_biases, layer2_weights, layer2_biases

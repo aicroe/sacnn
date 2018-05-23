@@ -27,8 +27,6 @@ class SACNN(object):
                  num_labels,
                  filter_size,
                  depth,
-                 pool_stride,
-                 hidden_units,
                  learning_rate=0.009,
                  keep_prob=0.5):
 
@@ -38,26 +36,20 @@ class SACNN(object):
         self.tf_keep_prob = tf.placeholder(tf.float32)
 
         # Define the parameters
-        layer1_filters = tf.Variable(tf.truncated_normal([filter_size, filter_size, channels, depth], stddev=0.1))
+        layer1_filters = tf.Variable(tf.truncated_normal([filter_size, word_dimension, channels, depth], stddev=0.1))
         layer1_biases = tf.Variable(tf.zeros([depth]))
-        reshape_size = math.floor((sentence_length - filter_size) / pool_stride + 1) * math.floor((word_dimension - filter_size) / pool_stride + 1) * depth
-        layer2_weights = tf.Variable(tf.truncated_normal([reshape_size, hidden_units], stddev=0.1))
-        layer2_biases = tf.Variable(tf.zeros([hidden_units]))
-        layer3_weights = tf.Variable(tf.truncated_normal([hidden_units, num_labels]))
-        layer3_biases = tf.Variable(tf.zeros([num_labels]))
+        layer2_weights = tf.Variable(tf.truncated_normal([depth, num_labels], stddev=0.1))
+        layer2_biases = tf.Variable(tf.zeros([num_labels]))
 
         self._parameters = Parameters(
             layer1_filters,
             layer1_biases,
             layer2_weights,
-            layer2_biases,
-            layer3_weights,
-            layer3_biases)
+            layer2_biases)
 
         self._hparameters = HyperParameters(
             filter_size,
-            filter_size,
-            pool_stride,
+            word_dimension,
             learning_rate)
 
         self._keep_prob = keep_prob
@@ -138,10 +130,8 @@ def _main():
     _, sentence_length, word_dimension, channels = train_dataset.shape
     raw_labels = [1, 2, 3, 4, 5]
 
-    filter_size = 5
-    depth = 64 #16 #100
-    pool_stride = 5
-    hidden_units = 128
+    filter_size = 3
+    depth = 64 #100
     keep_prob = 0.5
     learning_rate = 0.009
 
@@ -152,8 +142,6 @@ def _main():
         len(raw_labels),
         filter_size,
         depth,
-        pool_stride,
-        hidden_units,
         learning_rate,
         keep_prob)
 
@@ -165,7 +153,7 @@ def _main():
     init = tf.global_variables_initializer()
     session.run(init)
 
-    epochs = 11  # 121 #181 #251 #151
+    epochs = 201
     minibatch_size = 32
     epoch_print_cost = 1
 
@@ -203,9 +191,7 @@ def _main():
         parameters.layer1_filters.eval(session=session),
         parameters.layer1_biases.eval(session=session),
         parameters.layer2_weights.eval(session=session),
-        parameters.layer2_biases.eval(session=session),
-        parameters.layer3_weights.eval(session=session),
-        parameters.layer3_biases.eval(session=session))
+        parameters.layer2_biases.eval(session=session))
     print('parameters saved at data/')
 
     session.close()
