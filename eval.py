@@ -13,13 +13,17 @@ def _main():
     (layer1_list_filters,
     layer1_list_biases,
     layer2_weights,
-    layer2_biases) = DataManager.load_parameters(layer1_params_expected=3)
+    layer2_biases,
+    layer3_weights,
+    layer3_biases) = DataManager.load_parameters(layer1_params_expected=3)
 
     parameters = Parameters(
         map(lambda layer1_filters: tf.constant(layer1_filters), layer1_list_filters),
         map(lambda layer1_biases: tf.constant(layer1_biases), layer1_list_biases),
         tf.constant(layer2_weights),
-        tf.constant(layer2_biases))
+        tf.constant(layer2_biases),
+        tf.constant(layer3_weights),
+        tf.constant(layer3_biases))
 
     hparameters = HyperParameters(learning_rate=0)
     

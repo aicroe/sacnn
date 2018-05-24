@@ -7,11 +7,15 @@ class Parameters(object):
                  layer1_list_filters,
                  layer1_list_biases,
                  layer2_weights,
-                 layer2_biases):
+                 layer2_biases,
+                 layer3_weights,
+                 layer3_biases):
         self.layer1_list_filters = layer1_list_filters
         self.layer1_list_biases = layer1_list_biases
         self.layer2_weights = layer2_weights
         self.layer2_biases = layer2_biases
+        self.layer3_weights = layer3_weights
+        self.layer3_biases = layer3_biases
 
 
 class HyperParameters(object):
@@ -31,6 +35,8 @@ class SACNNBase(object):
         layer1_list_biases = self.parameters.layer1_list_biases
         layer2_weights = self.parameters.layer2_weights
         layer2_biases = self.parameters.layer2_biases
+        layer3_weights = self.parameters.layer3_weights
+        layer3_biases = self.parameters.layer3_biases
 
         learning_rate = self.hparameters.learning_rate
 
@@ -59,10 +65,12 @@ class SACNNBase(object):
         layer1_reshape = tf.reshape(layer1_pooling, [-1, reshape_size])
         layer1_dropout = tf.nn.dropout(layer1_reshape, self.keep_prob)
         layer2_linear = tf.matmul(layer1_dropout, layer2_weights) + layer2_biases
-        self.prediction = tf.nn.softmax(layer2_linear)
+        layer2_activation = tf.nn.relu(layer2_linear)
+        layer3_linear = tf.matmul(layer2_activation, layer3_weights) + layer3_biases
+        self.prediction = tf.nn.softmax(layer3_linear)
 
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
-            logits=layer2_linear, labels=self.labels))
+            logits=layer3_linear, labels=self.labels))
         if learning_rate != 0:
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)
 
@@ -84,7 +92,9 @@ class DataManager(object):
     def save_parameters(layer1_list_filters,
                         layer1_list_biases,
                         layer2_weights,
-                        layer2_biases):
+                        layer2_biases,
+                        layer3_weights,
+                        layer3_biases):
         index = 0
         for (layer1_filters, layer1_biases) in zip(layer1_list_filters, layer1_list_biases):
             np.save('data/layer1_{}_filters.npy'.format(index), layer1_filters)
@@ -92,6 +102,8 @@ class DataManager(object):
             index += 1
         np.save('data/layer2_weights.npy', layer2_weights)
         np.save('data/layer2_biases.npy', layer2_biases)
+        np.save('data/layer3_weights.npy', layer3_weights)
+        np.save('data/layer3_biases.npy', layer3_biases)
 
     @staticmethod
     def load_train_data():
@@ -118,4 +130,11 @@ class DataManager(object):
             layer1_list_biases.append(np.load('data/layer1_{}_biases.npy'.format(index)))
         layer2_weights = np.load('data/layer2_weights.npy')
         layer2_biases = np.load('data/layer2_biases.npy')
-        return layer1_list_filters, layer1_list_biases, layer2_weights, layer2_biases
+        layer3_weights = np.load('data/layer3_weights.npy')
+        layer3_biases = np.load('data/layer3_biases.npy')
+        return (layer1_list_filters, 
+                layer1_list_biases, 
+                layer2_weights, 
+                layer2_biases, 
+                layer3_weights, 
+                layer3_biases)

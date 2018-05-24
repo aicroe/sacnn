@@ -26,6 +26,7 @@ class SACNN(object):
                  channels,
                  num_labels,
                  filters_size,
+                 hidden_units,
                  learning_rate=0.009,
                  keep_prob=0.5):
 
@@ -45,14 +46,18 @@ class SACNN(object):
             next_layer_height += num_filters
             layer1_list_filters.append(layer1_filters)
             layer1_list_biases.append(layer1_biases)
-        layer2_weights = tf.Variable(tf.truncated_normal([next_layer_height, num_labels], stddev=0.1))
-        layer2_biases = tf.Variable(tf.zeros([num_labels]))
+        layer2_weights = tf.Variable(tf.truncated_normal([next_layer_height, hidden_units], stddev=0.1))
+        layer2_biases = tf.Variable(tf.zeros([hidden_units]))
+        layer3_weights = tf.Variable(tf.truncated_normal([hidden_units, num_labels], stddev=0.1))
+        layer3_biases = tf.Variable(tf.zeros([num_labels]))
 
         self._parameters = Parameters(
             layer1_list_filters,
             layer1_list_biases,
             layer2_weights,
-            layer2_biases)
+            layer2_biases,
+            layer3_weights,
+            layer3_biases)
 
         self._hparameters = HyperParameters(learning_rate)
 
@@ -135,6 +140,7 @@ def _main():
     raw_labels = [1, 2, 3, 4, 5]
 
     filters_size = [(3, 64), (5, 64), (7, 64)]
+    hidden_units = 64
     keep_prob = 0.5
     learning_rate = 0.009
 
@@ -144,6 +150,7 @@ def _main():
         channels,
         len(raw_labels),
         filters_size,
+        hidden_units,
         learning_rate,
         keep_prob)
 
@@ -194,7 +201,9 @@ def _main():
         map(lambda filters: filters.eval(session=session), parameters.layer1_list_filters),
         map(lambda biases: biases.eval(session=session), parameters.layer1_list_biases),
         parameters.layer2_weights.eval(session=session),
-        parameters.layer2_biases.eval(session=session))
+        parameters.layer2_biases.eval(session=session),
+        parameters.layer3_weights.eval(session=session),
+        parameters.layer3_biases.eval(session=session))
     print('parameters saved at data/')
 
     session.close()
