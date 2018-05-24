@@ -1,5 +1,7 @@
 raw
-data
+data/train_*.npy
+data/val_*.npy
+data/test_*.npy
 .vscode
 env.sh
 train-cost.png
