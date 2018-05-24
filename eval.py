@@ -10,23 +10,18 @@ def accuracy(predictions, labels):
 def _main():
     test_dataset, test_labels = DataManager.load_test_data()
 
-    (layer1_filters,
-    layer1_biases,
+    (layer1_list_filters,
+    layer1_list_biases,
     layer2_weights,
-    layer2_biases) = DataManager.load_parameters()
+    layer2_biases) = DataManager.load_parameters(layer1_params_expected=3)
 
     parameters = Parameters(
-        tf.constant(layer1_filters),
-        tf.constant(layer1_biases),
+        map(lambda layer1_filters: tf.constant(layer1_filters), layer1_list_filters),
+        map(lambda layer1_biases: tf.constant(layer1_biases), layer1_list_biases),
         tf.constant(layer2_weights),
         tf.constant(layer2_biases))
 
-    filter_heigth, filter_width, _, _ = layer1_filters.shape
-
-    hparameters = HyperParameters(
-        filter_heigth,
-        filter_width,
-        learning_rate=0)
+    hparameters = HyperParameters(learning_rate=0)
     
     model = SACNNBase(
         parameters,

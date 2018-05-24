@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-
+## TODO: move these functions to a util module
 def accuracy(predictions, labels):
     return (100.0 * np.sum(np.argmax(predictions, axis=1) == np.argmax(labels, axis=1)) / predictions.shape[0])
 
@@ -25,8 +25,7 @@ class SACNN(object):
                  word_dimension,
                  channels,
                  num_labels,
-                 filter_size,
-                 depth,
+                 filters_size,
                  learning_rate=0.009,
                  keep_prob=0.5):
 
@@ -36,21 +35,26 @@ class SACNN(object):
         self.tf_keep_prob = tf.placeholder(tf.float32)
 
         # Define the parameters
-        layer1_filters = tf.Variable(tf.truncated_normal([filter_size, word_dimension, channels, depth], stddev=0.1))
-        layer1_biases = tf.Variable(tf.zeros([depth]))
-        layer2_weights = tf.Variable(tf.truncated_normal([depth, num_labels], stddev=0.1))
+        layer1_list_filters = []
+        layer1_list_biases = []
+        next_layer_height = 0
+        for (filter_height, num_filters) in filters_size:
+            layer1_filters = tf.Variable(tf.truncated_normal([
+                filter_height, word_dimension, channels, num_filters], stddev=0.1))
+            layer1_biases = tf.Variable(tf.zeros([num_filters]))
+            next_layer_height += num_filters
+            layer1_list_filters.append(layer1_filters)
+            layer1_list_biases.append(layer1_biases)
+        layer2_weights = tf.Variable(tf.truncated_normal([next_layer_height, num_labels], stddev=0.1))
         layer2_biases = tf.Variable(tf.zeros([num_labels]))
 
         self._parameters = Parameters(
-            layer1_filters,
-            layer1_biases,
+            layer1_list_filters,
+            layer1_list_biases,
             layer2_weights,
             layer2_biases)
 
-        self._hparameters = HyperParameters(
-            filter_size,
-            word_dimension,
-            learning_rate)
+        self._hparameters = HyperParameters(learning_rate)
 
         self._keep_prob = keep_prob
         
@@ -130,8 +134,7 @@ def _main():
     _, sentence_length, word_dimension, channels = train_dataset.shape
     raw_labels = [1, 2, 3, 4, 5]
 
-    filter_size = 3
-    depth = 64 #100
+    filters_size = [(3, 64), (5, 64), (7, 64)]
     keep_prob = 0.5
     learning_rate = 0.009
 
@@ -140,8 +143,7 @@ def _main():
         word_dimension,
         channels,
         len(raw_labels),
-        filter_size,
-        depth,
+        filters_size,
         learning_rate,
         keep_prob)
 
@@ -155,7 +157,7 @@ def _main():
 
     epochs = 201
     minibatch_size = 32
-    epoch_print_cost = 1
+    epoch_print_cost = 10
 
     costs, val_costs = model.train(
         session,
@@ -174,6 +176,7 @@ def _main():
     plt.xlabel('iterations')
     plt.title('Learning rate = %d' % learning_rate)
     plt.savefig('train-cost.png')
+    ## TODO: add color labels for the curves
 
     print('-------training FINISHED---------')
     test_dict = {
@@ -185,11 +188,11 @@ def _main():
     print('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
     test_predictions = prediction.eval(session=session, feed_dict=test_dict)
     print('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
-
+ 
     parameters = model.get_parameters()
     DataManager.save_parameters(
-        parameters.layer1_filters.eval(session=session),
-        parameters.layer1_biases.eval(session=session),
+        map(lambda filters: filters.eval(session=session), parameters.layer1_list_filters),
+        map(lambda biases: biases.eval(session=session), parameters.layer1_list_biases),
         parameters.layer2_weights.eval(session=session),
         parameters.layer2_biases.eval(session=session))
     print('parameters saved at data/')

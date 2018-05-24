@@ -115,20 +115,25 @@ def _main():
 
     # Preparation
     assert samples.shape[0] == onevec_labels.shape[0]
-    seventy_percent = math.floor(samples.shape[0] * 0.75)
+    seventyfive_percent = math.floor(samples.shape[0] * 0.75)
     fifteen_percent = math.floor(samples.shape[0] * 0.15)
-    train_dataset = samples[:seventy_percent]
-    train_labels = onevec_labels[:seventy_percent]
-    val_dataset = samples[seventy_percent:seventy_percent + fifteen_percent]
-    val_labels = onevec_labels[seventy_percent:seventy_percent + fifteen_percent]
-    test_dataset = samples[seventy_percent + fifteen_percent:]
-    test_labels = onevec_labels[seventy_percent + fifteen_percent:]
+    train_dataset = samples[:seventyfive_percent]
+    train_labels = onevec_labels[:seventyfive_percent]
+    val_dataset = samples[seventyfive_percent:seventyfive_percent + fifteen_percent]
+    val_labels = onevec_labels[seventyfive_percent:seventyfive_percent + fifteen_percent]
+    test_dataset = samples[seventyfive_percent + fifteen_percent:]
+    test_labels = onevec_labels[seventyfive_percent + fifteen_percent:]
     print('train dataset shape: ({}, {}, {}, {})'.format(*train_dataset.shape))
     print('train labels shape: ({}, {})'.format(*train_labels.shape))
     print('val dataset shape: ({}, {}, {}, {})'.format(*val_dataset.shape))
     print('val labels shape: ({}, {})'.format(*val_labels.shape))
     print('test dataset shape: ({}, {}, {}, {})'.format(*test_dataset.shape))
     print('test labels shape: ({}, {})'.format(*test_labels.shape))
+    ## TODO: display the next with graphics
+    print('Data ratings : ' + str(raw_labels))
+    print('------ train : ' + str(np.sum(train_labels, axis=0)))
+    print('------ val   : ' + str(np.sum(val_labels, axis=0)))
+    print('------ test  : ' + str(np.sum(test_labels, axis=0)))
 
     # Save
     DataManager.save_data(

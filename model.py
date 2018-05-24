@@ -4,23 +4,18 @@ import tensorflow as tf
 
 class Parameters(object):
     def __init__(self,
-                 layer1_filters,
-                 layer1_biases,
+                 layer1_list_filters,
+                 layer1_list_biases,
                  layer2_weights,
                  layer2_biases):
-        self.layer1_filters = layer1_filters
-        self.layer1_biases = layer1_biases
+        self.layer1_list_filters = layer1_list_filters
+        self.layer1_list_biases = layer1_list_biases
         self.layer2_weights = layer2_weights
         self.layer2_biases = layer2_biases
 
 
 class HyperParameters(object):
-    def __init__(self,
-                 filter_heigth,
-                 filter_width,
-                 learning_rate):
-        self.filter_heigth = filter_heigth
-        self.filter_width = filter_width
+    def __init__(self, learning_rate):
         self.learning_rate = learning_rate
 
 
@@ -32,32 +27,36 @@ class SACNNBase(object):
         self.labels = labels
         self.keep_prob = keep_prob
 
-        layer1_filters = self.parameters.layer1_filters
-        layer1_biases = self.parameters.layer1_biases
+        layer1_list_filters = self.parameters.layer1_list_filters
+        layer1_list_biases = self.parameters.layer1_list_biases
         layer2_weights = self.parameters.layer2_weights
         layer2_biases = self.parameters.layer2_biases
 
-        filter_heigth = self.hparameters.filter_heigth
-        filter_width = self.hparameters.filter_width
         learning_rate = self.hparameters.learning_rate
 
         _, sentence_length, word_dimension, _ = self.dataset.get_shape().as_list()
 
-        assert filter_width == word_dimension
-
-        layer1_conv = tf.nn.conv2d(
-            self.dataset,
-            layer1_filters,
-            strides=[1, 1, 1, 1],
-            padding='VALID')
-        layer1_activation = tf.nn.relu(layer1_conv + layer1_biases)
-        layer1_pooling = tf.nn.max_pool(
-            layer1_activation,
-            [1, sentence_length - filter_heigth + 1, 1, 1],
-            strides=[1, 1, 1, 1],
-            padding='VALID')
-        pool_res_shape = layer1_pooling.get_shape().as_list()
-        layer1_reshape = tf.reshape(layer1_pooling, [-1, pool_res_shape[1] * pool_res_shape[2] * pool_res_shape[3]])
+        layer1_pool_activations = []
+        reshape_size = 0
+        for (layer1_filters, layer1_biases) in zip(layer1_list_filters, layer1_list_biases):
+            filter_heigth, filter_width, _, num_filters = layer1_filters.get_shape().as_list()
+            assert filter_width == word_dimension
+            layer1_conv = tf.nn.conv2d(
+                self.dataset,
+                layer1_filters,
+                strides=[1, 1, 1, 1],
+                padding='VALID')
+            layer1_activation = tf.nn.relu(layer1_conv + layer1_biases)
+            layer1_pooling = tf.nn.max_pool(
+                layer1_activation,
+                [1, sentence_length - filter_heigth + 1, 1, 1], ## The whole conv out is max pooled
+                strides=[1, 1, 1, 1],
+                padding='VALID')
+            ## Pool results have shape (1, 1, num_filters)
+            reshape_size += num_filters
+            layer1_pool_activations.append(layer1_pooling) 
+        layer1_pooling = tf.concat(layer1_pool_activations, -1)
+        layer1_reshape = tf.reshape(layer1_pooling, [-1, reshape_size])
         layer1_dropout = tf.nn.dropout(layer1_reshape, self.keep_prob)
         layer2_linear = tf.matmul(layer1_dropout, layer2_weights) + layer2_biases
         self.prediction = tf.nn.softmax(layer2_linear)
@@ -68,7 +67,9 @@ class SACNNBase(object):
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)
 
 
+## TODO: Move this class to another module
 class DataManager(object):
+    ## TODO: use np.savez instead of np.save
 
     @staticmethod
     def save_data(train_dataset, train_labels, val_dataset, val_labels, test_dataset, test_labels):
@@ -80,12 +81,15 @@ class DataManager(object):
         np.save('data/test_labels.npy', test_labels)
 
     @staticmethod
-    def save_parameters(layer1_filters,
-                        layer1_biases,
+    def save_parameters(layer1_list_filters,
+                        layer1_list_biases,
                         layer2_weights,
                         layer2_biases):
-        np.save('data/layer1_filters.npy', layer1_filters)
-        np.save('data/layer1_biases.npy', layer1_biases)
+        index = 0
+        for (layer1_filters, layer1_biases) in zip(layer1_list_filters, layer1_list_biases):
+            np.save('data/layer1_{}_filters.npy'.format(index), layer1_filters)
+            np.save('data/layer1_{}_biases.npy'.format(index), layer1_biases)
+            index += 1
         np.save('data/layer2_weights.npy', layer2_weights)
         np.save('data/layer2_biases.npy', layer2_biases)
 
@@ -106,9 +110,12 @@ class DataManager(object):
         return test_dataset, test_labels
 
     @staticmethod
-    def load_parameters():
-        layer1_filters = np.load('data/layer1_filters.npy')
-        layer1_biases = np.load('data/layer1_biases.npy')
+    def load_parameters(layer1_params_expected):
+        layer1_list_filters = []
+        layer1_list_biases = []
+        for index in range(layer1_params_expected):
+            layer1_list_filters.append(np.load('data/layer1_{}_filters.npy'.format(index)))
+            layer1_list_biases.append(np.load('data/layer1_{}_biases.npy'.format(index)))
         layer2_weights = np.load('data/layer2_weights.npy')
         layer2_biases = np.load('data/layer2_biases.npy')
-        return layer1_filters, layer1_biases, layer2_weights, layer2_biases
+        return layer1_list_filters, layer1_list_biases, layer2_weights, layer2_biases
