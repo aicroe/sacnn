@@ -66,7 +66,8 @@ class SACNNBase(object):
         layer1_dropout = tf.nn.dropout(layer1_reshape, self.keep_prob)
         layer2_linear = tf.matmul(layer1_dropout, layer2_weights) + layer2_biases
         layer2_activation = tf.nn.relu(layer2_linear)
-        layer3_linear = tf.matmul(layer2_activation, layer3_weights) + layer3_biases
+        layer2_dropout = tf.nn.dropout(layer2_activation, self.keep_prob)
+        layer3_linear = tf.matmul(layer2_dropout, layer3_weights) + layer3_biases
         self.prediction = tf.nn.softmax(layer3_linear)
 
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
