@@ -14,7 +14,7 @@ def load_embedding(path):
 
 
 def clean_str(dirty_word):
-    return re.sub(r'[\.,\-"\{\}\[\]\*\^;%\+&°!¡¿?#<>@/\(\)\\=:_~]', '', dirty_word.lower())
+    return re.sub(r'[\.,\-"\{\}\[\]\*\^;%\+&°!¡¿?#<>@/\(\)\\=:_~\$€\|]', '', dirty_word.lower())
 
 
 def process_comments(
@@ -53,6 +53,7 @@ def create_1vec_labels(labels, labels_values):
 
 
 def load_comments(comments_path):
+    AMOUNT_EDGE = 400
     types = {
         'rating': np.int32,
         'fullContent': np.str
@@ -65,11 +66,11 @@ def load_comments(comments_path):
         usecols=list(types.keys()),
         dtype=types)
 
-    comments_rating_1 = comments_frame[comments_frame['rating'] == 1][0:50]
-    comments_rating_2 = comments_frame[comments_frame['rating'] == 2][0:50]
-    comments_rating_3 = comments_frame[comments_frame['rating'] == 3][0:50]
-    comments_rating_4 = comments_frame[comments_frame['rating'] == 4][0:50]
-    comments_rating_5 = comments_frame[comments_frame['rating'] == 5][0:50]
+    comments_rating_1 = comments_frame[comments_frame['rating'] == 1][0:AMOUNT_EDGE]
+    comments_rating_2 = comments_frame[comments_frame['rating'] == 2][0:AMOUNT_EDGE]
+    comments_rating_3 = comments_frame[comments_frame['rating'] == 3][0:AMOUNT_EDGE]
+    comments_rating_4 = comments_frame[comments_frame['rating'] == 4][0:AMOUNT_EDGE]
+    comments_rating_5 = comments_frame[comments_frame['rating'] == 5][0:AMOUNT_EDGE]
 
     print('comments rating=1: %d' % comments_rating_1.shape[0])
     print('comments rating=2: %d' % comments_rating_2.shape[0])
@@ -115,14 +116,14 @@ def _main():
 
     # Preparation
     assert samples.shape[0] == onevec_labels.shape[0]
-    seventy_percent = math.floor(samples.shape[0] * 0.75)
-    fifteen_percent = math.floor(samples.shape[0] * 0.15)
-    train_dataset = samples[:seventy_percent]
-    train_labels = onevec_labels[:seventy_percent]
-    val_dataset = samples[seventy_percent:seventy_percent + fifteen_percent]
-    val_labels = onevec_labels[seventy_percent:seventy_percent + fifteen_percent]
-    test_dataset = samples[seventy_percent + fifteen_percent:]
-    test_labels = onevec_labels[seventy_percent + fifteen_percent:]
+    eighty_percent = math.floor(samples.shape[0] * 0.80)
+    ten_percent = math.floor(samples.shape[0] * 0.10)
+    train_dataset = samples[:eighty_percent]
+    train_labels = onevec_labels[:eighty_percent]
+    val_dataset = samples[eighty_percent:eighty_percent + ten_percent]
+    val_labels = onevec_labels[eighty_percent:eighty_percent + ten_percent]
+    test_dataset = samples[eighty_percent + ten_percent:]
+    test_labels = onevec_labels[eighty_percent + ten_percent:]
     print('train dataset shape: ({}, {}, {}, {})'.format(*train_dataset.shape))
     print('train labels shape: ({}, {})'.format(*train_labels.shape))
     print('val dataset shape: ({}, {}, {}, {})'.format(*val_dataset.shape))

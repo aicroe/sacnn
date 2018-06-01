@@ -153,9 +153,9 @@ def _main():
     init = tf.global_variables_initializer()
     session.run(init)
 
-    epochs = 201
+    epochs = 301
     minibatch_size = 32
-    epoch_print_cost = 1
+    epoch_print_cost = 10
 
     costs, val_costs = model.train(
         session,
