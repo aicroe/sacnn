@@ -136,7 +136,7 @@ def _main():
     session = tf.Session()
 
     _, sentence_length, word_dimension, channels = train_dataset.shape
-    raw_labels = [1, 2, 3, 4, 5]
+    _, num_labels = train_labels.shape
 
     filter_size = 5
     depth = 64 #16 #100
@@ -149,7 +149,7 @@ def _main():
         sentence_length,
         word_dimension,
         channels,
-        len(raw_labels),
+        num_labels,
         filter_size,
         depth,
         pool_stride,
