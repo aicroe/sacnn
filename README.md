@@ -26,6 +26,14 @@ $ python process_data.py
 
 It will place the train, validation and test data in the _data_ folder.
 
+Optionally it can be used the next script:
+
+```bash
+$ python reduce_labels.py
+```
+
+In order to decrease the number of labels since the raw data has 5 classes, this script reduce them to 3. It often increase the accuracy.
+
 ## Train the network
 
 Run the script:

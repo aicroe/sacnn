@@ -137,9 +137,9 @@ def _main():
     session = tf.Session()
 
     _, sentence_length, word_dimension, channels = train_dataset.shape
-    raw_labels = [1, 2, 3, 4, 5]
+    _, num_labels = train_labels.shape
 
-    filters_size = [(3, 64), (5, 64), (7, 64)]
+    filters_size = [(3, 96), (5, 96), (7, 64)]
     hidden_units = 64
     keep_prob = 0.5
     learning_rate = 0.009
@@ -148,7 +148,7 @@ def _main():
         sentence_length,
         word_dimension,
         channels,
-        len(raw_labels),
+        num_labels,
         filters_size,
         hidden_units,
         learning_rate,
