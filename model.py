@@ -70,7 +70,8 @@ class SACNNBase(object):
         layer3_linear = tf.matmul(layer2_dropout, layer3_weights) + layer3_biases
         self.prediction = tf.nn.softmax(layer3_linear)
 
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
+        if self.labels is not None:
+            self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
             logits=layer3_linear, labels=self.labels))
         if learning_rate != 0:
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)

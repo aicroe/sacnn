@@ -87,7 +87,8 @@ class SACNN(object):
               val_labels,
               minibatch_size,
               epochs,
-              epoch_print_cost=0):
+              epoch_print_cost=0,
+              logger=print):
         costs = []
         val_costs = []
         num_minibatches = math.ceil(train_dataset.shape[0] / minibatch_size)
@@ -108,9 +109,9 @@ class SACNN(object):
             #if (minibatch_cost < 10):
             costs.append(minibatch_cost)
             if epoch_print_cost > 0 and epoch % epoch_print_cost == 0:
-                print('--------epoch: %d-------' % epoch)
-                print('cost over training set: %f' % minibatch_cost)
-                print('accuarcy over training set: %f' % minibatch_accuarcy)
+                logger('--------epoch: %d-------' % epoch)
+                logger('cost over training set: %f' % minibatch_cost)
+                logger('accuarcy over training set: %f' % minibatch_accuarcy)
                 val_dict = {
                     self.tf_dataset: val_dataset,
                     self.tf_labels: val_labels,
@@ -119,12 +120,19 @@ class SACNN(object):
                 val_predictions = self._prediction.eval(session=session, feed_dict=val_dict)
                 val_cost = self._cost.eval(session=session, feed_dict=val_dict)
                 val_costs.append(val_cost)
-                print('cost over validation set: %f' % val_cost)
-                print('accuarcy over validation set: %f' % accuracy(val_predictions, val_labels))
+                logger('cost over validation set: %f' % val_cost)
+                logger('accuarcy over validation set: %f' % accuracy(val_predictions, val_labels))
         return costs, val_costs
 
 
-def _main():
+def train_model(
+        learning_rate,
+        epochs,
+        epoch_print_cost,
+        minibatch_size,
+        hidden_units,
+        filters_size,
+        logger):
     (train_dataset,
     train_labels,
     val_dataset,
@@ -138,11 +146,7 @@ def _main():
 
     _, sentence_length, word_dimension, channels = train_dataset.shape
     _, num_labels = train_labels.shape
-
-    filters_size = [(3, 96), (5, 96), (7, 64)]
-    hidden_units = 64
     keep_prob = 0.5
-    learning_rate = 0.009
 
     model = SACNN(
         sentence_length,
@@ -162,10 +166,6 @@ def _main():
     init = tf.global_variables_initializer()
     session.run(init)
 
-    epochs = 201
-    minibatch_size = 32
-    epoch_print_cost = 10
-
     costs, val_costs = model.train(
         session,
         train_dataset,
@@ -174,28 +174,30 @@ def _main():
         val_labels,
         minibatch_size,
         epochs,
-        epoch_print_cost)
+        epoch_print_cost,
+        logger)
 
-    plt.plot(
-        [x for x in range(len(costs))], costs, 'b', 
+    plots = plt.plot(
+        [x for x in range(len(costs))], costs, 'C0',
         [x * epoch_print_cost for x in range((len(val_costs)))], val_costs, 'r')
-    plt.ylabel('cost')
-    plt.xlabel('iterations')
-    plt.title('Learning rate = %d' % learning_rate)
+    plt.ylabel('Costo')
+    plt.xlabel('Iteraciones')
+    plt.legend(plots, ('Entrenamiento', 'Validación'))
+    plt.title('Tasa de aprendizaje = %.3f' % learning_rate)
     plt.savefig('train-cost.png')
     ## TODO: add color labels for the curves
 
-    print('-------training FINISHED---------')
+    logger('-------training FINISHED---------')
     test_dict = {
         tf_dataset: test_dataset,
         tf_labels: test_labels,
         tf_keep_prob: 1
     }
     test_predictions = prediction.eval(session=session, feed_dict=test_dict)
-    print('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
+    logger('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
     test_predictions = prediction.eval(session=session, feed_dict=test_dict)
-    print('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
- 
+    logger('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
+    
     parameters = model.get_parameters()
     DataManager.save_parameters(
         map(lambda filters: filters.eval(session=session), parameters.layer1_list_filters),
@@ -204,10 +206,23 @@ def _main():
         parameters.layer2_biases.eval(session=session),
         parameters.layer3_weights.eval(session=session),
         parameters.layer3_biases.eval(session=session))
-    print('parameters saved at data/')
+    logger('parameters saved at data/')
 
     session.close()
 
 
 if __name__ == '__main__':
-    _main()
+    epochs = 201
+    minibatch_size = 32
+    epoch_print_cost = 10
+    filters_size = [(3, 96), (5, 96), (7, 64)]
+    hidden_units = 64
+    learning_rate = 0.009
+    train_model(
+        learning_rate,
+        epochs,
+        epoch_print_cost,
+        minibatch_size,
+        hidden_units,
+        filters_size,
+        print)
