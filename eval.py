@@ -1,65 +1,48 @@
-from model import Parameters, HyperParameters, SACNNBase, DataManager
-import numpy as np
-import tensorflow as tf
+from lib.classifier_factory import ClassifierFactory
+from lib.sacnn import SACNN
+from lib.data_saver import DataSaver
+import argparse
 
 
-def accuracy(predictions, labels):
-    return (100.0 * np.sum(np.argmax(predictions, axis=1) == np.argmax(labels, axis=1)) / predictions.shape[0])
+parser = argparse.ArgumentParser()
+parser.add_argument('--arch',  default='evolved', type=str)
+parser.add_argument('--labels', default=5, type=int)
+args = parser.parse_args()
 
+if (args.arch != 'base' and args.arch != 'evolved') or (args.labels != 3 and args.labels != 5):
+    raise BaseException('[wrong arguments]')
 
-def confusion_matrix(predicted_labels, real_labels):
-    assert real_labels.shape == predicted_labels.shape
-    num_samples, num_labels = real_labels.shape
-    matrix = np.zeros((num_labels, num_labels))
-    for index in range(num_samples):
-        matrix[np.argmax(real_labels[index]), np.argmax(predicted_labels[index])] += 1
-    return matrix
-
-def confusion_matrix_accuracy(matrix):
-    height, width = matrix.shape
-    assert height == width
-    accuracy = np.zeros(width)
-    for index in range(height):
-        accuracy[index] = matrix[index, index] / np.sum(matrix[:, index])
-    return accuracy
-
-
-def _main():
-    test_dataset, test_labels = DataManager.load_test_data()
-
-    (layer1_list_filters,
-    layer1_list_biases,
-    layer2_weights,
-    layer2_biases,
-    layer3_weights,
-    layer3_biases) = DataManager.load_parameters(layer1_params_expected=3)
-
-    parameters = Parameters(
-        map(lambda layer1_filters: tf.constant(layer1_filters), layer1_list_filters),
-        map(lambda layer1_biases: tf.constant(layer1_biases), layer1_list_biases),
-        tf.constant(layer2_weights),
-        tf.constant(layer2_biases),
-        tf.constant(layer3_weights),
-        tf.constant(layer3_biases))
-
-    hparameters = HyperParameters(learning_rate=0)
+if args.labels == 5:
+    test_dataset, test_labels = DataSaver.load_data(just_test_data=True)
+else:
+    test_dataset, test_labels = DataSaver.load_reduced_data(just_test_data=True)
     
-    model = SACNNBase(
-        parameters,
-        hparameters,
-        tf.constant(test_dataset),
-        tf.constant(test_labels),
-        keep_prob=1)
+_, sentence_length, word_dimension, channels = test_dataset.shape
+_, num_labels = test_labels.shape
+filters_size = [(3, 96), (5, 96), (7, 64)]
+hidden_units = 64
 
-    prediction = model.prediction
-    cost = model.cost
-    with tf.Session() as session:
-        test_predictions = prediction.eval()
-        print('accuarcy over test set: %f' % accuracy(test_predictions, test_labels))
-        print('cost over test set: %f' % cost.eval())
-        matrix = confusion_matrix(test_predictions, test_labels)
-        print('Confusion matrix:\n', matrix)
-        print('accuracy:', confusion_matrix_accuracy(matrix))
+name = '%s-c%d' % (args.arch, args.labels)
+if args.arch == 'evolved':
+    model = ClassifierFactory.evolved_model(name,
+                                            word_dimension,
+                                            sentence_length,
+                                            channels,
+                                            filters_size,
+                                            hidden_units,
+                                            num_labels)
+else:
+    model = ClassifierFactory.base_model(name,
+                                         word_dimension,
+                                         sentence_length,
+                                         channels,
+                                         filters_size,
+                                         num_labels)
 
-if __name__ == '__main__':
-    _main()
+print('parameters restored', model.restore())
+
+test_cost, test_accuracy, confusion_matrix = model.test(test_dataset, test_labels)
+print('accuarcy over test set: %f' % test_accuracy)
+print('cost over test set: %f' % test_cost)
+print('confusion matrix:\n', confusion_matrix)
+print('confision matrix accuracy:', SACNN.confusion_matrix_accuracy(confusion_matrix))

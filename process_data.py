@@ -1,55 +1,9 @@
-import re
 import math
-from gensim.models import KeyedVectors
 import numpy as np
 import pandas as pd
-from model import DataManager
-
-
-def load_embedding(path):
-    # other word2vecs binaries are loaded as:
-    # from gensim.models import Word2Vec
-    # Word2Vec.load(...)
-    return KeyedVectors.load_word2vec_format(path, binary=True)
-
-
-def clean_str(dirty_word):
-    return re.sub(r'[\.,\-"\{\}\[\]\*\^;%\+&°!¡¿?#<>@/\(\)\\=:_~\$€\|]', '', dirty_word.lower())
-
-
-def process_comments(
-        word_to_vector,
-        comments_values,
-        samples_count,
-        sentence_length,
-        word_dimension,
-        channels):
-    samples = np.empty((samples_count, sentence_length,
-                        word_dimension, channels), dtype=np.float32)
-    for sample_index in range(samples_count):
-        comment = comments_values[sample_index].split()
-        sample = np.zeros((sentence_length, word_dimension, 1))
-        word_index = 0
-        for word in comment:
-            word = clean_str(word)
-            if word_index >= sentence_length:
-                break
-            try:
-                word_embedding = word_to_vector[word]
-            except:
-                continue
-            sample[word_index] = word_embedding.reshape((word_dimension, 1))
-            word_index += 1
-        samples[sample_index] = sample
-    return samples
-
-
-def create_1vec_labels(labels, labels_values):
-    amount_samples = labels_values.shape[0]
-    onevec_labels = np.zeros((amount_samples, len(labels)), dtype=np.float32)
-    for index in range(amount_samples):
-        onevec_labels[index, labels.index(labels_values[index])] = 1
-    return onevec_labels
+from lib.data_saver import DataSaver
+from lib.data_processor import DataProcessor
+from lib.embedding_factory import EmbeddingFactory
 
 
 def load_comments(comments_path):
@@ -86,65 +40,58 @@ def load_comments(comments_path):
         comments_rating_5], ignore_index=True)
     return comments_frame
 
+
 def _main():
-    EMBEDDING_PATH = 'raw/SBW-vectors-300-min5.bin'
-    COMMENTS_PATH = 'raw/comments.csv'
     sentence_length = 100
     channels = 1
     raw_labels = [1, 2, 3, 4, 5]
 
-    print('loading embedding')
-    embedding = load_embedding(EMBEDDING_PATH)
-    print('loading comments')
-    comments_frame = load_comments(COMMENTS_PATH)
-
+    print('Loading embedding')
+    embedding, _ = EmbeddingFactory.get_embedding()
+    print('Loading comments')
+    comments_frame = load_comments(str(DataSaver.prepare_dir('raw').joinpath('comments.csv')))
     samples_count, _ = comments_frame.shape
-    _, word_dimension = embedding.wv.vectors.shape
 
     np.random.seed(0)
     comments_frame = comments_frame.iloc[np.random.permutation(samples_count)].reset_index(drop=True)
 
-    print('processing comments')
-    samples = process_comments(
-        embedding.wv,
-        comments_frame['fullContent'],
-        samples_count,
-        sentence_length,
-        word_dimension,
-        channels)
-    onevec_labels = create_1vec_labels(raw_labels, comments_frame['rating'])
+    print('Processing comments')
+    print(comments_frame['fullContent'].shape)
+    data_processor = DataProcessor(embedding.wv, sentence_length, channels)
+    samples = data_processor.process(comments_frame['fullContent'])
+    onehot_labels = DataProcessor.create_1hot_vectors(comments_frame['rating'], raw_labels)
 
     # Preparation
-    assert samples.shape[0] == onevec_labels.shape[0]
+    assert samples.shape[0] == onehot_labels.shape[0]
     eighty_percent = math.floor(samples.shape[0] * 0.80)
     ten_percent = math.floor(samples.shape[0] * 0.10)
     train_dataset = samples[:eighty_percent]
-    train_labels = onevec_labels[:eighty_percent]
+    train_labels = onehot_labels[:eighty_percent]
     val_dataset = samples[eighty_percent:eighty_percent + ten_percent]
-    val_labels = onevec_labels[eighty_percent:eighty_percent + ten_percent]
+    val_labels = onehot_labels[eighty_percent:eighty_percent + ten_percent]
     test_dataset = samples[eighty_percent + ten_percent:]
-    test_labels = onevec_labels[eighty_percent + ten_percent:]
+    test_labels = onehot_labels[eighty_percent + ten_percent:]
     print('train dataset shape: ({}, {}, {}, {})'.format(*train_dataset.shape))
     print('train labels shape: ({}, {})'.format(*train_labels.shape))
     print('val dataset shape: ({}, {}, {}, {})'.format(*val_dataset.shape))
     print('val labels shape: ({}, {})'.format(*val_labels.shape))
     print('test dataset shape: ({}, {}, {}, {})'.format(*test_dataset.shape))
     print('test labels shape: ({}, {})'.format(*test_labels.shape))
-    ## TODO: display the next with graphics
+    
     print('Data ratings : ' + str(raw_labels))
     print('------ train : ' + str(np.sum(train_labels, axis=0)))
     print('------ val   : ' + str(np.sum(val_labels, axis=0)))
     print('------ test  : ' + str(np.sum(test_labels, axis=0)))
 
     # Save
-    DataManager.save_data(
+    DataSaver.save_data(
         train_dataset,
         train_labels,
         val_dataset,
         val_labels,
         test_dataset,
         test_labels)
-    print('train and test data saved at data/')
+    print('Saved train, val, test data')
 
 
 if __name__ == '__main__':
