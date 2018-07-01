@@ -5,8 +5,12 @@ Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the embe
 ## Requirements
 
 * Tensorflow 1.6 or greater
-* Pandas
-* Gensim
+
+Check requeriments.txt for the others
+
+## The workspace
+
+The workspace is in ***~/.scann***, all folders mentioned after are placed there.
 
 ## Place the raws
 
@@ -32,7 +36,7 @@ Optionally it can be used the next script:
 $ python reduce_labels.py
 ```
 
-In order to decrease the number of labels since the raw data has 5 classes, this script reduce them to 3. It often increase the accuracy.
+In order to decrease the number of labels since the raw data has 5 classes, this script reduce and saves them at _data\_reduced_ folder.
 
 ## Train the network
 
@@ -42,7 +46,7 @@ Run the script:
 $ python train.py
 ```
 
-It reads the data saved at _data_ in order to train the network. Saves the trained parameters in the _data_ folder.
+It reads the data saved at _data_ in order to train the network. Saves the trained parameters a folder called equals as the network.
 
 ## Evaluate
 
