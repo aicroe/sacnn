@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from lib.data_saver import DataSaver
 from lib.data_processor import DataProcessor
-from lib.embedding_factory import EmbeddingFactory
+from lib.word_embedding import WordEmbedding
 
 
 def load_comments(comments_path):
@@ -47,7 +47,7 @@ def _main():
     raw_labels = [1, 2, 3, 4, 5]
 
     print('Loading embedding')
-    embedding, _ = EmbeddingFactory.get_embedding()
+    embedding, _ = WordEmbedding.get_instance()
     print('Loading comments')
     comments_frame = load_comments(str(DataSaver.prepare_dir('raw').joinpath('comments.csv')))
     samples_count, _ = comments_frame.shape

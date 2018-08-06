@@ -4,7 +4,7 @@ from .sacnn import SACNN
 from .data_processor import DataProcessor
 from .comment_classifier import CommentClassifier
 from .data_saver import DataSaver
-from .embedding_factory import EmbeddingFactory
+from .word_embedding import WordEmbedding
 import tensorflow as tf
 
 
@@ -13,8 +13,8 @@ class ClassifierFactory(object):
 
     @staticmethod
     def base_model(name,
-                   word_dimension,
                    sentence_length,
+                   word_dimension,
                    channels,
                    filters_size,
                    num_labels):
@@ -46,8 +46,8 @@ class ClassifierFactory(object):
 
     @staticmethod
     def evolved_model(name,
-                      word_dimension,
                       sentence_length,
+                      word_dimension,
                       channels,
                       filters_size,
                       hidden_units,
@@ -88,7 +88,7 @@ class ClassifierFactory(object):
                            filters_size,
                            hidden_units,
                            num_labels):
-        embedding, word_dimension = EmbeddingFactory.get_embedding()
+        embedding, word_dimension = WordEmbedding.get_instance()
         channels = ClassifierFactory.channels
         model = ClassifierFactory.evolved_model(name,
                                                 sentence_length,
@@ -105,7 +105,7 @@ class ClassifierFactory(object):
                         sentence_length,
                         filters_size,
                         num_labels):
-        embedding, word_dimension = EmbeddingFactory.get_embedding()
+        embedding, word_dimension = WordEmbedding.get_instance()
         channels = ClassifierFactory.channels
         model = ClassifierFactory.base_model(name,
                                              sentence_length,
