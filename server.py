@@ -32,7 +32,7 @@ def classify_comment():
     return render_template('result.html', result=result)
 
 
-@app.route('train', methods=['POST'])
+@app.route('/train', methods=['POST'])
 def train_instance():
     pass
 
