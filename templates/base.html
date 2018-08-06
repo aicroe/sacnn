@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>SACNN</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.3/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.3/dist/semantic.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css"/>
+    {% endblock %}
+</head>
+<body>
+    <nav class="ui attached menu">
+        <div class="ui container">
+            <a class="item" href="/train">Entrenar</a>
+            <a class="item" href="/classify">Classificar</a>
+        </div>
+    </nav>
+    <div class="ui container segment">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

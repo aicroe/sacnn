@@ -1,0 +1,25 @@
+input, textarea {
+    width: 100%;
+}
+
+textarea {
+    min-height: 150px;
+    box-sizing: border-box;
+}
+
+.result {
+    display: inline;
+}
+
+nav div.ui.container a.item {
+    background-color: #eee;
+}
+
+nav div.ui.container a.item:hover {
+    color: #039be5;
+    background-color: #cfd8dc;
+}
+
+nav div.ui.container a.item.active {
+    color: #039be5;
+}
