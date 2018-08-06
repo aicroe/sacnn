@@ -1,21 +1,26 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
+    <script src="/static/classifier.js" ></script>
 {% endblock %}
 {% block content %}
-    <form class="ui form" action="/classify" method="POST">
-        <div class="field">
-            <label>Elige la instancia:</label>
-            <select name="instance_name">
-                {% for name in instance_names -%}
-                    <option selected value="{{ name }}">{{ name }}</option>
-                {%- endfor %}
-            </select>
-        </div>
-        <div class="field">
-            <label>Comentario:</label>
-            <textarea name="comment" placeholder="Comment..." required></textarea>
-        </div>
-        <input class="ui button" type="submit" value="Clasificar">
-    </form>
+    <div id="classifier" class="ui segment">
+        <form class="ui form" action="/classify" method="POST">
+            <div class="field">
+                <label>Elige la instancia:</label>
+                <select v-model="instanceName" required>
+                    {% for name in instance_names -%}
+                        <option value="{{ name }}">{{ name }}</option>
+                    {%- endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Comentario:</label>
+                <textarea v-model="comment" placeholder="Introdusca el comentario..." required></textarea>
+            </div>
+            <input class="ui button" type="submit" value="Clasificar" v-on:click="classifyComment">
+        </form>
+        <hr class="gray">
+        <classify-result v-bind:result="result"></classify-result>
+    </div>
 {% endblock %}

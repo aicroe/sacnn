@@ -23,3 +23,12 @@ nav div.ui.container a.item:hover {
 nav div.ui.container a.item.active {
     color: #039be5;
 }
+
+.gray {
+    color: rgba(34, 36, 38, 0.15);
+}
+
+.result.text {
+    color: rgba(0,0,0,.87);
+    font-weight: 700;
+}

@@ -4,6 +4,7 @@ from flask import Flask
 from flask import render_template
 from flask import url_for
 from flask import request
+from flask import jsonify
 
 
 app = Flask(__name__)
@@ -24,12 +25,13 @@ def render_train():
 
 @app.route('/classify', methods=['POST'])
 def classify_comment():
-    comment = request.form['comment']
-    instance_name = request.form['instance_name']
+    content = request.get_json()
+    comment = content['comment']
+    instance_name = content['instance_name']
     result = 'Empty comment'
     if len(comment) > 0:
         result = classifier_ctrl.classify(instance_name, comment)
-    return render_template('result.html', result=result)
+    return jsonify(result=result)
 
 
 @app.route('/train', methods=['POST'])
