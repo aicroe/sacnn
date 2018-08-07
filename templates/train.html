@@ -1,9 +1,50 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
+    <script src="/static/train.js"></script>
 {% endblock %}
 {% block content %}
-    <form class="ui form" action="/train" method="POST">
-
-    </form>
+    <div id="trainer" class="ui segment">
+        <form class="ui form">
+            <div class="field">
+                <label>Arquitectura:</label>
+                <select v-model="arch" v-bind:disabled="loading" required>
+                    <option value="base">Base</option>
+                    <option value="evolved">Evolucionada</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Nombre de la instancia:</label>
+                <input v-model="instanceName" v-bind:disabled="loading" required>
+            </div>
+            <div class="field" v-if="arch === 'evolved'">
+                <label>Unidades escondidas:</label>
+                <input v-model="hiddenUnits" v-bind:disabled="loading" type="number" min="1" required>
+            </div>
+            <div class="field">
+                <label>Número de etiquetas:</label>
+                <select v-model="numLabels" v-bind:disabled="loading" required>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Tasa de aprendizaje:</label>
+                <input v-model="learningRate" v-bind:disabled="loading" type="number" min="0" step="0.0001" required>
+            </div>
+            <div class="field">
+                <label>Número de iteraciones:</label>
+                <input v-model="epochs" v-bind:disabled="loading" type="number" min="1" required>
+            </div>
+            <div class="field">
+                <label>Tamaño mini-lote:</label>
+                <input v-model="minibatchSize" v-bind:disabled="loading" type="number" min="1" required>
+            </div>
+            <div class="field">
+                <label>Tasa de dropout:</label>
+                <input v-model="keepProb" v-bind:disabled="loading" type="number" min="0" step="0.01" required>
+            </div>
+            <input class="ui button" v-bind:disabled="loading" type="submit" value="Entrenar" v-on:click="trainInstance">
+        </form>
+    </div>
 {% endblock %}
