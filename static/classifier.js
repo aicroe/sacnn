@@ -18,6 +18,7 @@ window.onload = function () {
     },
     methods: {
       classifyComment: function (event) {
+        this.comment = this.comment.trim();
         if (this.comment.length > 0 && this.instanceName.length > 0) {
           event.preventDefault();
           document.body.style.cursor = 'wait';
