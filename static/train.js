@@ -1,4 +1,11 @@
 window.onload = function () {
+  const socketio = io.connect('');
+  socketio.on('connect', function () {
+    socketio.emit('message', { data: 'I\'m connected!' });
+  });
+  socketio.on('train-progress', function (data) {
+    console.log(data)
+  });
   const trainer = new Vue({
     el: '#trainer',
     data: {
@@ -10,7 +17,7 @@ window.onload = function () {
       epochs: 100,
       minibatchSize: 16,
       keepProb: 0.5,
-      loading: false
+      training: false
     },
     methods: {
       trainInstance: function (event) {
@@ -24,7 +31,8 @@ window.onload = function () {
             this.minibatchSize > 0 &&
             this.keepProb > 0) {
           event.preventDefault();
-          this.loading = true;
+          this.training = true;
+          $('.ui.indicating.progress').progress({})
           document.body.style.cursor = 'wait';
           fetch('/train', {
               method: 'POST',
@@ -43,11 +51,13 @@ window.onload = function () {
               })
             })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => {
+              console.log(data);
+            })
             .catch(error => console.error(error))
             .finally(() => document.body.style.cursor = 'default');
         }
       }
     }
-  })
+  });
 }

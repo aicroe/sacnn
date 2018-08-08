@@ -5,9 +5,11 @@ from flask import render_template
 from flask import url_for
 from flask import request
 from flask import jsonify
+from flask_socketio import SocketIO
 
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 app_state = AppState()
 classifier_ctrl = ClassifierController(app_state)
 
@@ -36,8 +38,10 @@ def classify_comment():
 
 @app.route('/train', methods=['POST'])
 def train_instance():
-    pass
+    print(request.get_json())
+    socketio.send('train-progress', {'data': 42})
+    return jsonify(success="success")
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
