@@ -12,10 +12,19 @@ class AppState(object):
     def get_all_instances(self):
         return self.cursor.execute('SELECT * FROM instances')
 
+    def is_unique_name(self, name):
+        instances = self.cursor.execute(
+            'SELECT name FROM instances WHERE name = ?', (name,)).fetchall()
+        return len(instances) == 0
+
     def record_instance(self, name, hidden_units, num_labels, arch):
         self.cursor.execute(
             'INSERT INTO instances VALUES (?, ?, ?, ?)',
             (name, hidden_units, num_labels, arch))
+        self.cursor.connection.commit()
+
+    def remove_instance(self, name):
+        self.cursor.execute('DELETE FROM instances WHERE name = ?', (name,))
         self.cursor.connection.commit()
 
     def get_instance_by_name(self, name):

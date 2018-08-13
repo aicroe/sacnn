@@ -1,17 +1,20 @@
 from app.app_state import AppState
 from app.classifier_controller import ClassifierController
+from app.train_controller import TrainController
 from flask import Flask
 from flask import render_template
 from flask import url_for
 from flask import request
 from flask import jsonify
-from flask_socketio import SocketIO
+from werkzeug.exceptions import HTTPException, BadRequest
+import threading
+from lib.data_saver import DataSaver
 
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 app_state = AppState()
 classifier_ctrl = ClassifierController(app_state)
+train_ctrl = TrainController(app_state)
 
 
 @app.route('/')
@@ -38,10 +41,25 @@ def classify_comment():
 
 @app.route('/train', methods=['POST'])
 def train_instance():
-    print(request.get_json())
-    socketio.send('train-progress', {'data': 42})
+    hyperparams = request.get_json()
+
+    def train_instance_runner():
+        train_ctrl.train_instance(hyperparams)
+
+    if not app_state.is_unique_name(hyperparams['name']):
+        raise BadRequest('not_unique_name')
+    threading.Thread(target=train_instance_runner).start()
+    print('Training')
     return jsonify(success="success")
 
 
+@app.route('/train_state', methods=['POST'])
+def train_instance_state():
+    params = request.get_json()
+    state = train_ctrl.get_training_state(params['name']).to_dict()
+    print(state)
+    return jsonify(state)
+
+
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    app.run(debug=True)
