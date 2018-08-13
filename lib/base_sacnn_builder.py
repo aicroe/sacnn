@@ -1,10 +1,20 @@
-from .sacnn_builder import SACNNBuilder
+import tensorflow as tf
+from .sacnn_creator import SACNNCreator
+from .sacnn_validator import SACNNValidator
+from .sacnn_trainer import SACNNTrainer
 from .base_arch import BaseArch
 from .sacnn import SACNN
-import tensorflow as tf
 
 
-class BaseSCANNBuilder(SACNNBuilder):
+class BaseSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
+    instance = None
+
+    @staticmethod
+    def get_instance():
+        if BaseSCANNBuilder.instance is None:
+            BaseSCANNBuilder.instance = BaseSCANNBuilder()
+        return BaseSCANNBuilder.instance
+
     def __init__(self):
         super().__init__([
             'name',
@@ -17,11 +27,11 @@ class BaseSCANNBuilder(SACNNBuilder):
         self.validate_hparams(hyperparams)
 
         name = hyperparams['name']
-        sentence_length = hyperparams['sentence_length']
-        word_dimension = hyperparams['word_dimension']
+        sentence_length = int(hyperparams['sentence_length'])
+        word_dimension = int(hyperparams['word_dimension'])
         channels = self.channels
         filters_size = hyperparams['filters_size']
-        num_labels = hyperparams['num_labels']
+        num_labels = int(hyperparams['num_labels'])
         graph = tf.Graph()
 
         with graph.as_default():
