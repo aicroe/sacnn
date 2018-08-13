@@ -100,13 +100,11 @@ class SACNN(object):
                 val_predictions = self.arch.prediction.eval(session=self.session, feed_dict=val_dict)
                 val_cost = cost.eval(session=self.session, feed_dict=val_dict)
                 val_costs.append(val_cost)
-                epoch_callback(epoch, 
-                               minibatch_accuarcy, 
-                               minibatch_cost, 
-                               self.accuracy(val_predictions, val_labels), 
-                               val_cost)
-            else:
-                epoch_callback(epoch, minibatch_accuarcy, minibatch_cost)
+                epoch_callback(int(epoch),
+                               float(minibatch_accuarcy),
+                               float(minibatch_cost),
+                               float(self.accuracy(val_predictions, val_labels)),
+                               float(val_cost))
             
         return costs, val_costs
 
