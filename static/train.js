@@ -2,7 +2,7 @@ window.onload = function () {
   const trainer = new Vue({
     el: '#trainer',
     data: {
-      arch: 'base',
+      arch: 'kim',
       instanceName: '',
       hiddenUnits: 64,
       numLabels: 3,
@@ -21,7 +21,7 @@ window.onload = function () {
 
   function trainInstance(event) {
     this.instanceName = this.instanceName.trim();
-    if ((this.arch === 'base' || this.arch === 'evolved') &&
+    if ((this.arch === 'kim' || this.arch === 'evolved') &&
       this.instanceName.length > 0 &&
       this.hiddenUnits > 0 &&
       (this.numLabels === 3 || this.numLabels === 5) &&

@@ -2,18 +2,18 @@ import tensorflow as tf
 from .sacnn_creator import SACNNCreator
 from .sacnn_validator import SACNNValidator
 from .sacnn_trainer import SACNNTrainer
-from .base_arch import BaseArch
+from .kim_arch import KimArch
 from .sacnn import SACNN
 
 
-class BaseSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
+class KimSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
     instance = None
 
     @staticmethod
     def get_instance():
-        if BaseSCANNBuilder.instance is None:
-            BaseSCANNBuilder.instance = BaseSCANNBuilder()
-        return BaseSCANNBuilder.instance
+        if KimSCANNBuilder.instance is None:
+            KimSCANNBuilder.instance = KimSCANNBuilder()
+        return KimSCANNBuilder.instance
 
     def __init__(self):
         super().__init__([
@@ -53,10 +53,10 @@ class BaseSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
                 [next_layer_height, num_labels], stddev=0.1))
             layer2_biases = tf.Variable(tf.zeros([num_labels]))
 
-            arch = BaseArch(input_placeholder,
-                            layer1_list_filters,
-                            layer1_list_biases,
-                            layer2_weights,
-                            layer2_biases,
-                            keep_prob)
+            arch = KimArch(input_placeholder,
+                           layer1_list_filters,
+                           layer1_list_biases,
+                           layer2_weights,
+                           layer2_biases,
+                           keep_prob)
             return SACNN(name, arch, graph)

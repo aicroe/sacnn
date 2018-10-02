@@ -1,5 +1,5 @@
 from abc import ABC
-from lib.base_sacnn_builder import BaseSCANNBuilder
+from lib.kim_sacnn_builder import KimSCANNBuilder
 from lib.evolved_sacnn_builder import EvolvedCANNBuilder
 from lib.word_embedding import WordEmbedding
 
@@ -9,6 +9,6 @@ class AppController(ABC):
     filters_size = [(3, 96), (5, 96), (7, 64)]
     (_, word_dimension) = WordEmbedding.get_instance()
     builder = {
-        'base': BaseSCANNBuilder.get_instance(),
+        'kim': KimSCANNBuilder.get_instance(),
         'evolved': EvolvedCANNBuilder.get_instance()
     }

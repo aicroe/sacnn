@@ -2,7 +2,7 @@ from .arch import Arch
 import tensorflow as tf
 
 
-class BaseArch(Arch):
+class KimArch(Arch):
     def __init__(self,
                  input_tensor,                 
                  layer1_list_filters,
