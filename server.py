@@ -3,12 +3,10 @@ from app.classifier_controller import ClassifierController
 from app.train_controller import TrainController
 from flask import Flask
 from flask import render_template
-from flask import url_for
 from flask import request
 from flask import jsonify
-from werkzeug.exceptions import HTTPException, BadRequest
+from werkzeug.exceptions import BadRequest
 import threading
-from lib.data_saver import DataSaver
 
 
 app = Flask(__name__)
@@ -62,4 +60,4 @@ def train_instance_state():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
