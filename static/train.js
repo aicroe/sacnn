@@ -11,8 +11,7 @@ window.onload = function () {
       epochPrintCost: 5,
       minibatchSize: 16,
       keepProb: 0.5,
-      sending: false,
-      training: false
+      trainState: '',
     },
     methods: {
       trainInstance
@@ -32,7 +31,6 @@ window.onload = function () {
       this.keepProb > 0) {
 
       event.preventDefault();
-      this.sending = true;
       document.body.style.cursor = 'wait';
 
       fetch('/train', {
@@ -54,9 +52,8 @@ window.onload = function () {
       })
         .then(response => {
           if (response.status === 200) {
-            this.training = true;
-            this.sending = false;
-            startTraining(this.instanceName, this.epochs);
+            this.trainState = 'initializing';
+            startTraining.call(this, this.instanceName, this.epochs);
           } else {
             throw response.statusText;
           }
@@ -79,9 +76,12 @@ window.onload = function () {
     const interval = setInterval(() => {
       askTrainingState(instanceName)
         .then(data => {
-          progressBar.progress('set progress', +data['epoch'] + 1);
-          if (data['state'] === 'finished') {
+          this.trainState = data['state'];
+          if (this.trainState === 'finished') {
+            progressBar.progress('set progress', epochs);
             clearInterval(interval);
+          } else {
+            progressBar.progress('set progress', +data['epoch']);
           }
         })
         .catch(error => console.error(error));

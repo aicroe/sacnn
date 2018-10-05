@@ -5,6 +5,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
+from flask import send_file
 from werkzeug.exceptions import BadRequest
 import threading
 
@@ -18,12 +19,8 @@ train_ctrl = TrainController(app_state)
 @app.route('/')
 @app.route('/classify', methods=['GET'])
 def render_classify():
+    print('hello')
     return render_template('classifier.html', instance_names=app_state.get_instance_names())
-
-
-@app.route('/train')
-def render_train():
-    return render_template('train.html')
 
 
 @app.route('/classify', methods=['POST'])
@@ -35,6 +32,22 @@ def classify_comment():
     if len(comment) > 0:
         result = classifier_ctrl.classify(instance_name, comment)
     return jsonify(result=result)
+
+
+@app.route('/train')
+def render_train():
+    return render_template('train.html')
+
+
+@app.route('/train/<instance_name>/learning-curve', methods=['GET'])
+def return_learning_curve(instance_name):
+    try:
+        instance_state = train_ctrl.get_training_state(instance_name)
+    except:
+        raise BadRequest('instance_name_not_found')
+
+    filepath = instance_state.learning_curve_path
+    return send_file(filepath, mimetype='image/png')
 
 
 @app.route('/train', methods=['POST'])

@@ -16,6 +16,7 @@ class InstanceState(object):
         self.test_cost = None
         self.test_accuracy = None
         self.confusion_matrix = None
+        self.learning_curve_path = None
 
     def to_dict(self):
         if self.state == 'initializing' or self.state == 'training':
@@ -33,7 +34,7 @@ class InstanceState(object):
                 'val_costs': self.val_costs,
                 'test_cost': self.test_cost,
                 'test_accuracy': self.test_accuracy,
-                'confusion_matrix': self.confusion_matrix
+                'confusion_matrix': self.confusion_matrix,
             }
 
 
@@ -80,7 +81,8 @@ class TrainController(AppController):
                                        hyperparams['arch'])
         self.training_instances[name] = InstanceState()
         epochs = hyperparams['epochs']
-        callback = create_train_callback(self.training_instances[name], int(epochs))
+        callback = create_train_callback(
+            self.training_instances[name], int(epochs))
 
         try:
             (_,
@@ -111,7 +113,11 @@ class TrainController(AppController):
         plt.xlabel('Iteraciones')
         plt.legend(plots, ('Entrenamiento', 'Validación'))
         plt.title('Tasa de aprendizaje = %.3f' % learning_rate)
-        plt.savefig(str(DataSaver.get_app_dir().joinpath('train-cost-%s.png' % hyperparams['name'])))
+
+        self.training_instances[name].learning_curve_path = str(
+            DataSaver.get_app_dir().joinpath('train-cost-%s.png' % hyperparams['name']))
+        plt.savefig(self.training_instances[name].learning_curve_path)
+
         print('Test Accuracy:\n', test_accuracy)
         print('Test Cost:', test_cost)
         print('Confusion Matrix:\n', confusion_matrix)

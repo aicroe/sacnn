@@ -5,56 +5,59 @@
 {% endblock %}
 {% block content %}
     <div id="trainer" class="ui segment">
-        <form v-show="!training" class="ui form">
+        <form v-show="!trainState" class="ui form">
             <div class="field">
                 <label>Arquitectura:</label>
-                <select v-model="arch" v-bind:disabled="sending || training" required>
+                <select v-model="arch" v-bind:disabled="!!trainState" required>
                     <option value="kim">Kim</option>
                     <option value="evolved">Evolucionada</option>
                 </select>
             </div>
             <div class="field">
                 <label>Nombre de la instancia:</label>
-                <input v-model="instanceName" v-bind:disabled="sending || training" required>
+                <input v-model="instanceName" v-bind:disabled="!!trainState" required>
             </div>
             <div class="field" v-if="arch === 'evolved'">
                 <label>Unidades escondidas:</label>
-                <input v-model="hiddenUnits" v-bind:disabled="sending || training" type="number" min="1" required>
+                <input v-model="hiddenUnits" v-bind:disabled="!!trainState" type="number" min="1" required>
             </div>
             <div class="field">
                 <label>Número de etiquetas:</label>
-                <select v-model="numLabels" v-bind:disabled="sending || training" required>
+                <select v-model="numLabels" v-bind:disabled="!!trainState" required>
                     <option value="3">3</option>
                     <option value="5">5</option>
                 </select>
             </div>
             <div class="field">
                 <label>Tasa de aprendizaje:</label>
-                <input v-model="learningRate" v-bind:disabled="sending || training" type="number" min="0" step="0.0001" required>
+                <input v-model="learningRate" v-bind:disabled="!!trainState" type="number" min="0" step="0.0001" required>
             </div>
             <div class="field">
                 <label>Número de iteraciones:</label>
-                <input v-model="epochs" v-bind:disabled="sending || training" type="number" min="1" required>
+                <input v-model="epochs" v-bind:disabled="!!trainState" type="number" min="1" required>
             </div>
             <div class="field">
                 <label>Calcular costo cada # iteración:</label>
-                <input v-model="epochPrintCost" v-bind:disabled="sending || training" type="number" min="1" required>
+                <input v-model="epochPrintCost" v-bind:disabled="!!trainState" type="number" min="1" required>
             </div>
             <div class="field">
                 <label>Tamaño mini-lote:</label>
-                <input v-model="minibatchSize" v-bind:disabled="sending || training" type="number" min="1" required>
+                <input v-model="minibatchSize" v-bind:disabled="!!trainState" type="number" min="1" required>
             </div>
             <div class="field">
                 <label>Tasa de dropout:</label>
-                <input v-model="keepProb" v-bind:disabled="sending || training" type="number" min="0" step="0.01" required>
+                <input v-model="keepProb" v-bind:disabled="!!trainState" type="number" min="0" step="0.01" required>
             </div>
-            <input class="ui button" v-bind:disabled="sending || training" type="submit" value="Entrenar" v-on:click="trainInstance">
+            <input class="ui button" v-bind:disabled="!!trainState" type="submit" value="Entrenar" v-on:click="trainInstance">
         </form>
-        <div v-show="training" class="ui teal progress" id="progress-bar">
-            <div class="bar">
-                <div class="progress"></div>
+        <div v-show="trainState">
+            <div class="ui teal progress" id="progress-bar">
+                <div class="bar">
+                    <div class="progress"></div>
+                </div>
+                <div class="label">Entrenando</div>
             </div>
-            <div class="label">Entrenando</div>
+            <img v-if="trainState === 'finished'" v-bind:src="'/train/' + instanceName + '/learning-curve'" alt="Curva de aprendizaje" class="center">
         </div>
     </div>
 {% endblock %}
