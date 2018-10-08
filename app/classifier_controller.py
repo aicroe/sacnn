@@ -43,9 +43,10 @@ class ClassifierController(AppController):
         :param int max_stack:
         """
         self.instance_stack = InstanceStack(max_stack)
-        self.word_embedding, _ = WordEmbedding.get_instance()
+        self.word_embedding, word_dimension = WordEmbedding.get_instance()
         self.data_processor = DataProcessor(self.word_embedding,
                                             self.sentence_length,
+                                            word_dimension,
                                             SACNNCreator.channels)
         self.app_state = app_state
 

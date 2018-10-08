@@ -23,10 +23,11 @@ class DataProcessor(object):
     def __init__(self,
                  word_to_vector,
                  sentence_length,
+                 word_dimension,
                  channels):
         self.word_to_vector = word_to_vector
         self.sentence_length = sentence_length
-        _, self.word_dimension = word_to_vector.vectors.shape
+        self.word_dimension = word_dimension
         self.channels = channels
 
     def process_one(self, sentence):
