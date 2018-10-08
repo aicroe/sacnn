@@ -12,13 +12,14 @@ window.onload = function () {
       minibatchSize: 16,
       keepProb: 0.5,
       trainState: '',
+      error: '',
     },
     methods: {
       trainInstance
     }
   });
 
-  function trainInstance(event) {
+  async function trainInstance(event) {
     this.instanceName = this.instanceName.trim();
     if ((this.arch === 'kim' || this.arch === 'evolved') &&
       this.instanceName.length > 0 &&
@@ -33,7 +34,7 @@ window.onload = function () {
       event.preventDefault();
       document.body.style.cursor = 'wait';
 
-      fetch('/train', {
+      const response = await fetch('/train', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -49,17 +50,14 @@ window.onload = function () {
           minibatch_size: this.minibatchSize,
           keep_prob: this.keepProb
         })
-      })
-        .then(response => {
-          if (response.status === 200) {
-            this.trainState = 'initializing';
-            startTraining.call(this, this.instanceName, this.epochs);
-          } else {
-            throw response.statusText;
-          }
-        })
-        .catch(error => console.error(error))
-        .finally(() => document.body.style.cursor = 'default');
+      });
+      if (response.status === 200) {
+        this.trainState = 'initializing';
+        startTraining.call(this, this.instanceName, this.epochs);
+      } else {
+        this.error = response.statusText;
+      }
+      document.body.style.cursor = 'default';
     }
   }
 
@@ -73,23 +71,26 @@ window.onload = function () {
         }
       });
     progressBar.progress('set progress', 0);
-    const interval = setInterval(() => {
-      askTrainingState(instanceName)
-        .then(data => {
-          this.trainState = data['state'];
-          if (this.trainState === 'finished') {
-            progressBar.progress('set progress', epochs);
-            clearInterval(interval);
-          } else {
-            progressBar.progress('set progress', +data['epoch']);
-          }
-        })
-        .catch(error => console.error(error));
+    const interval = setInterval(async () => {
+      let data;
+      try {
+        data = await askTrainingState(instanceName);
+      } catch (error) {
+        this.error = error || 'UNEXPECTED ERROR';
+        return clearInterval(interval);
+      }
+      this.trainState = data['state'];
+      if (this.trainState === 'finished') {
+        progressBar.progress('set progress', epochs);
+        clearInterval(interval);
+      } else {
+        progressBar.progress('set progress', +data['epoch']);
+      }
     }, 5000);
   }
 
-  function askTrainingState(instanceName) {
-    return fetch('/train_state', {
+  async function askTrainingState(instanceName) {
+    const response = await fetch('/train_state', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -97,12 +98,11 @@ window.onload = function () {
       body: JSON.stringify({
         name: instanceName
       })
-    }).then((response) => {
-      if (response.status === 200) {
-        return response.json();
-      } else {
-        throw response.statusText;
-      }
     });
+    if (response.status === 200) {
+      return response.json();
+    } else {
+      throw response.statusText;
+    }
   }
 }

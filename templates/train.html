@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
     <div id="trainer" class="ui segment">
-        <form v-show="!trainState" class="ui form">
+        <form v-if="!error" v-show="!trainState" class="ui form">
             <div class="field">
                 <label>Arquitectura:</label>
                 <select v-model="arch" v-bind:disabled="!!trainState" required>
@@ -48,9 +48,9 @@
                 <label>Tasa de dropout:</label>
                 <input v-model="keepProb" v-bind:disabled="!!trainState" type="number" min="0" step="0.01" required>
             </div>
-            <input class="ui button" v-bind:disabled="!!trainState" type="submit" value="Entrenar" v-on:click="trainInstance">
+            <input class="ui button" v-bind:disabled="!!trainState || epochPrintCost > epochs" type="submit" value="Entrenar" v-on:click="trainInstance">
         </form>
-        <div v-show="trainState">
+        <div v-if="!error" v-show="trainState">
             <div class="ui teal progress" id="progress-bar">
                 <div class="bar">
                     <div class="progress"></div>
@@ -58,6 +58,9 @@
                 <div class="label">Entrenando</div>
             </div>
             <img v-if="trainState === 'finished'" v-bind:src="'/train/' + instanceName + '/learning-curve'" alt="Curva de aprendizaje" class="center">
+        </div>
+        <div v-if="error">
+            <h4 v-html="error" class="red"></h4>
         </div>
     </div>
 {% endblock %}

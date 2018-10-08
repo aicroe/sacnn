@@ -67,8 +67,10 @@ def train_instance():
 @app.route('/train_state', methods=['POST'])
 def train_instance_state():
     params = request.get_json()
-    state = train_ctrl.get_training_state(params['name']).to_dict()
-    print(state)
+    try:
+        state = train_ctrl.get_training_state(params['name']).to_dict()
+    except:
+        raise BadRequest('instance_not_found')
     return jsonify(state)
 
 

@@ -91,7 +91,7 @@ class TrainController(AppController):
              test_cost,
              test_accuracy,
              confusion_matrix) = builder.train(hyperparams, callback)
-        except Exception:
+        except:
             self.app_state.remove_instance(hyperparams['name'])
             del self.training_instances[name]
             return
@@ -106,6 +106,7 @@ class TrainController(AppController):
         epoch_print_cost = int(hyperparams['epoch_print_cost'])
         learning_rate = float(hyperparams['learning_rate'])
 
+        plt.clf()
         plots = plt.plot(
             [x for x in range(len(costs))], costs, 'C0',
             [x * epoch_print_cost for x in range((len(val_costs)))], val_costs, 'r')

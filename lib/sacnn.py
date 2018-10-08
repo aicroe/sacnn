@@ -4,7 +4,7 @@ import math
 
 
 class SACNN(object):
-    
+
     @staticmethod
     def accuracy(predictions, labels):
         return (100.0 * np.sum(np.argmax(predictions, axis=1) == np.argmax(labels, axis=1)) / predictions.shape[0])
@@ -26,7 +26,7 @@ class SACNN(object):
         for index in range(height):
             accuracy[index] = matrix[index, index] / (1 if np.sum(matrix[:, index]) == 0 else np.sum(matrix[:, index]))
         return accuracy
-    
+
     @staticmethod
     def generate_random_minibatches(inputs, outputs, minibatch_size):
         assert inputs.shape[0] == outputs.shape[0]
@@ -66,7 +66,7 @@ class SACNN(object):
             cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
             logits=self.arch.logits, labels=self.expected_output))
             optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
-        
+
         costs = []
         val_costs = []
         num_minibatches = math.ceil(train_dataset.shape[0] / minibatch_size)
@@ -88,7 +88,7 @@ class SACNN(object):
                 train_predictions, _, current_cost = self.session.run(tensors, feed_dict=train_dict)
                 minibatch_cost += current_cost / num_minibatches
                 minibatch_accuarcy += self.accuracy(train_predictions, minibatch_labels) / num_minibatches
-            
+
             costs.append(minibatch_cost)
 
             if epoch_print_cost > 0 and epoch % epoch_print_cost == 0:
@@ -105,7 +105,7 @@ class SACNN(object):
                                float(minibatch_cost),
                                float(self.accuracy(val_predictions, val_labels)),
                                float(val_cost))
-            
+
         return costs, val_costs
 
     def test(self, test_dataset, test_labels):

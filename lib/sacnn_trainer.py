@@ -24,9 +24,13 @@ class SACNNTrainer(ABC):
         self.validate(['learning_rate', 'epochs', 'epoch_print_cost',
                        'minibatch_size', 'keep_prob'], hyperparams)
 
+        epochs = int(hyperparams['epochs'])
         epoch_print_cost = int(hyperparams['epoch_print_cost'])
+        if epoch_print_cost > epochs:
+            raise BaseException('ilegal_epoch_print_cost')
+
         hparams = Hyperparams(float(hyperparams['learning_rate']),
-                              int(hyperparams['epochs']),
+                              epochs,
                               int(hyperparams['minibatch_size']),
                               float(hyperparams['keep_prob']))
         costs, val_costs = sacnn.train(
