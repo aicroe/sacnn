@@ -12,13 +12,13 @@ def sentiment_factory(sentiment_map):
     """
     :param dict sentiment_map
     """ 
-    def evaluate_one(self, input_data):
+    def evaluate(self, input_data):
         """
         :param SACNN self:
         :param numpy input_data:
         """
-        return sentiment_map[self.evaluate([input_data])[0]]
-    return evaluate_one
+        return list(map(lambda evaluation: sentiment_map[evaluation], self.evaluate(input_data)))
+    return evaluate
 
 
 class ClassifierController(AppController):
@@ -72,7 +72,7 @@ class ClassifierController(AppController):
             else:
                 raise BaseException('instance_not_found_by_name')
 
-    def classify(self, instance_name, comment):
+    def classify(self, instance_name, comments):
         """
         :param str instance_name:
         :param str comment:
@@ -80,5 +80,5 @@ class ClassifierController(AppController):
         """
         self.select_instance(instance_name)
         instance = self.instance_stack[instance_name]
-        input_data = self.data_processor.process_one(comment)
+        input_data = self.data_processor.process(comments)
         return instance.sentiment(input_data)

@@ -19,19 +19,19 @@ train_ctrl = TrainController(app_state)
 @app.route('/')
 @app.route('/classify', methods=['GET'])
 def render_classify():
-    print('hello')
     return render_template('classifier.html', instance_names=app_state.get_instance_names())
 
 
 @app.route('/classify', methods=['POST'])
 def classify_comment():
     content = request.get_json()
-    comment = content['comment']
+    comments = content['comments']
     instance_name = content['instance_name']
-    result = 'Empty comment'
-    if len(comment) > 0:
-        result = classifier_ctrl.classify(instance_name, comment)
-    return jsonify(result=result)
+    if len(comments) > 0:
+        results = classifier_ctrl.classify(instance_name, comments)
+    else:
+        raise BadRequest('empty_comments')
+    return jsonify(results=results)
 
 
 @app.route('/train')

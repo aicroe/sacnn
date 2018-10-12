@@ -48,6 +48,7 @@ class DataProcessor(object):
         return sample
 
     def process(self, sentences):
+        sentences = np.array(sentences)
         (sentences_count,) = sentences.shape
         samples = np.empty((sentences_count, self.sentence_length,
                             self.word_dimension, self.channels), dtype=np.float32)
