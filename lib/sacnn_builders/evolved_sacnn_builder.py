@@ -1,19 +1,14 @@
+import tensorflow as tf
+from lib.singleton_decorator import singleton
+from lib.archs.evolved_arch import EvolvedArch
+from lib.sacnn import SACNN
 from .sacnn_creator import SACNNCreator
 from .sacnn_validator import SACNNValidator
 from .sacnn_trainer import SACNNTrainer
-from lib.archs.evolved_arch import EvolvedArch
-from lib.sacnn import SACNN
-import tensorflow as tf
 
 
+@singleton()
 class EvolvedCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
-    instance = None
-
-    @staticmethod
-    def get_instance():
-        if EvolvedCANNBuilder.instance is None:
-            EvolvedCANNBuilder.instance = EvolvedCANNBuilder()
-        return EvolvedCANNBuilder.instance
 
     def __init__(self):
         super().__init__([

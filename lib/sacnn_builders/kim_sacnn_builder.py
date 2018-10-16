@@ -1,19 +1,14 @@
 import tensorflow as tf
+from lib.singleton_decorator import singleton
+from lib.archs.kim_arch import KimArch
+from lib.sacnn import SACNN
 from .sacnn_creator import SACNNCreator
 from .sacnn_validator import SACNNValidator
 from .sacnn_trainer import SACNNTrainer
-from lib.archs.kim_arch import KimArch
-from lib.sacnn import SACNN
 
 
+@singleton()
 class KimSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):
-    instance = None
-
-    @staticmethod
-    def get_instance():
-        if KimSCANNBuilder.instance is None:
-            KimSCANNBuilder.instance = KimSCANNBuilder()
-        return KimSCANNBuilder.instance
 
     def __init__(self):
         super().__init__([
