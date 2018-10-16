@@ -12,7 +12,7 @@ Vue.component('comment-input', {
         class="fourteen wide field"
       >
         <textarea
-          rows="2"
+          rows="5"
           v-model="comment.text"
           placeholder="Comentario..."
           v-bind:disabled="!enabled"

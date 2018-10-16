@@ -24,8 +24,8 @@
             <div class="field">
                 <label>Número de etiquetas:</label>
                 <select v-model="numLabels" v-bind:disabled="!!trainState" required>
-                    <option value="3">3</option>
-                    <option value="5">5</option>
+                    <option v-bind:value="3">3</option>
+                    <option v-bind:value="5">5</option>
                 </select>
             </div>
             <div class="field">

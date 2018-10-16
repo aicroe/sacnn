@@ -1,6 +1,6 @@
 from abc import ABC
-from lib.kim_sacnn_builder import KimSCANNBuilder
-from lib.evolved_sacnn_builder import EvolvedCANNBuilder
+from lib.sacnn_builders.kim_sacnn_builder import KimSCANNBuilder
+from lib.sacnn_builders.evolved_sacnn_builder import EvolvedCANNBuilder
 from lib.word_embedding import WordEmbedding
 
 

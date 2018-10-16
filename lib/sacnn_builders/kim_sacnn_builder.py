@@ -2,8 +2,8 @@ import tensorflow as tf
 from .sacnn_creator import SACNNCreator
 from .sacnn_validator import SACNNValidator
 from .sacnn_trainer import SACNNTrainer
-from .kim_arch import KimArch
-from .sacnn import SACNN
+from lib.archs.kim_arch import KimArch
+from lib.sacnn import SACNN
 
 
 class KimSCANNBuilder(SACNNCreator, SACNNValidator, SACNNTrainer):

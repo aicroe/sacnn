@@ -1,5 +1,6 @@
-from lib.sacnn_validator import SACNNValidator
+from lib.sacnn_builders.sacnn_validator import SACNNValidator
 from lib.data_saver import DataSaver
+from lib.train_iterators.early_stop_iterator import EarlyStopIterator
 from .app_state import AppState
 from .app_controller import AppController
 import matplotlib
@@ -81,17 +82,18 @@ class TrainController(AppController):
                                        hyperparams['arch'])
         self.training_instances[name] = InstanceState()
         epochs = hyperparams['epochs']
-        callback = create_train_callback(
-            self.training_instances[name], int(epochs))
+        callback = create_train_callback(self.training_instances[name], int(epochs))
 
         try:
             (_,
+             iterations,
              costs,
              val_costs,
              test_cost,
              test_accuracy,
-             confusion_matrix) = builder.train(hyperparams, callback)
-        except:
+             confusion_matrix) = builder.train(hyperparams, callback, EarlyStopIterator())
+        except BaseException as exception:
+            print(exception)
             self.app_state.remove_instance(hyperparams['name'])
             del self.training_instances[name]
             return
@@ -119,6 +121,7 @@ class TrainController(AppController):
             DataSaver.get_app_dir().joinpath('train-cost-%s.png' % hyperparams['name']))
         plt.savefig(self.training_instances[name].learning_curve_path)
 
+        print('Iterations:\n', iterations)
         print('Test Accuracy:\n', test_accuracy)
         print('Test Cost:', test_cost)
         print('Confusion Matrix:\n', confusion_matrix)

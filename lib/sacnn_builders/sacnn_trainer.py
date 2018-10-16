@@ -1,6 +1,7 @@
-from .data_saver import DataSaver
-from .hyperparams import Hyperparams
 from abc import ABC
+from lib.data_saver import DataSaver
+from lib.hyperparams import Hyperparams
+from lib.train_iterators.simple_iterator import SimpleIterator
 
 
 class SACNNTrainer(ABC):
@@ -12,7 +13,7 @@ class SACNNTrainer(ABC):
             5: DataSaver.load_data
         }
 
-    def train(self, hyperparams, callback):
+    def train(self, hyperparams, callback, iterator=SimpleIterator.get_instance()):
         sacnn = self.create(hyperparams)
         (train_dataset,
          train_labels,
@@ -33,17 +34,18 @@ class SACNNTrainer(ABC):
                               epochs,
                               int(hyperparams['minibatch_size']),
                               float(hyperparams['keep_prob']))
-        costs, val_costs = sacnn.train(
+        iterations, costs, val_costs = sacnn.train(
             train_dataset,
             train_labels,
             hparams,
             epoch_print_cost,
             callback,
             val_dataset,
-            val_labels)
+            val_labels,
+            iterator)
 
         test_cost, test_accuracy, confusion_matrix = sacnn.test(
             test_dataset, test_labels)
         sacnn.save()
 
-        return sacnn, costs, val_costs, test_cost, test_accuracy, confusion_matrix
+        return sacnn, iterations, costs, val_costs, test_cost, test_accuracy, confusion_matrix

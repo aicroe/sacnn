@@ -1,8 +1,8 @@
 from .sacnn_creator import SACNNCreator
 from .sacnn_validator import SACNNValidator
 from .sacnn_trainer import SACNNTrainer
-from .evolved_arch import EvolvedArch
-from .sacnn import SACNN
+from lib.archs.evolved_arch import EvolvedArch
+from lib.sacnn import SACNN
 import tensorflow as tf
 
 
