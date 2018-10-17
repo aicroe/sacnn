@@ -1,29 +1,13 @@
 import tensorflow as tf
 import numpy as np
 import math
+
+from lib.helpers.confusion_matrix import ConfusionMatrix
 from .train_iterators.simple_iterator import SimpleIterator
 from .helpers.accuracy import Accuracy
 
 
 class SACNN(object):
-
-    @staticmethod
-    def compute_confusion(predicted_labels, real_labels):
-        assert real_labels.shape == predicted_labels.shape
-        num_samples, num_labels = real_labels.shape
-        matrix = np.zeros((num_labels, num_labels))
-        for index in range(num_samples):
-            matrix[np.argmax(real_labels[index]), np.argmax(predicted_labels[index])] += 1
-        return matrix
-
-    @staticmethod
-    def confusion_matrix_accuracy(matrix):
-        height, width = matrix.shape
-        assert height == width
-        accuracy = np.zeros(width)
-        for index in range(height):
-            accuracy[index] = matrix[index, index] / (1 if np.sum(matrix[:, index]) == 0 else np.sum(matrix[:, index]))
-        return accuracy
 
     @staticmethod
     def generate_random_minibatches(inputs, outputs, minibatch_size):
@@ -40,11 +24,13 @@ class SACNN(object):
             name,
             arch,
             graph,
-            accuracy=Accuracy.get_instance()):
+            accuracy=Accuracy.get_instance(),
+            confusion_matrix=ConfusionMatrix.get_instance()):
         self.name = name
         self.arch = arch
         self.graph = graph
         self.accuracy = accuracy
+        self.confusion_matrix = confusion_matrix
         self.session = tf.Session(graph=self.graph)
         with self.graph.as_default():
             self.arch.build()
@@ -117,7 +103,7 @@ class SACNN(object):
                 logits=self.arch.logits, labels=test_labels))
         test_accuracy = self.accuracy(test_predictions, test_labels)
         test_cost = cost.eval(session=self.session, feed_dict=test_dict)
-        confusion_matrix = SACNN.compute_confusion(test_predictions, test_labels)
+        confusion_matrix = self.confusion_matrix.compute(test_predictions, test_labels)
         return test_cost, test_accuracy, confusion_matrix
 
     def evaluate(self, input_dataset):

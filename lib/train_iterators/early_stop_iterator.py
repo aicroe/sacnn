@@ -29,14 +29,13 @@ class EarlyStopIterator(TrainIterator):
                            float(minibatch_cost),
                            float(self.accuracy(val_predictions, val_labels)),
                            float(val_cost))
-            print(current_val_cost)
             if val_cost < current_val_cost:
                 iterations_failing = 0
                 current_val_cost = val_cost
             else:
                 iterations_failing += 1
-            print(iterations_failing, val_cost)
 
         if iterations_failing >= self.patience and epoch < epochs:
+            print('Early stop performed at epoch %d' % epoch)
             epoch_callback(epochs, None, None, None, None)
         return epoch, costs, val_costs
