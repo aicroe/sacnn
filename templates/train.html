@@ -17,6 +17,13 @@
                 <label>Nombre de la instancia:</label>
                 <input v-model="instanceName" v-bind:disabled="!!trainState" required>
             </div>
+            <div class="field">
+                <label>Iterador:</label>
+                <select v-model="iterator" v-bind:disabled="!!trainState" required>
+                    <option value="simple">Simple</option>
+                    <option value="early_stop">Parada temprana</option>
+                </select>
+            </div>
             <div class="field" v-if="arch === 'evolved'">
                 <label>Unidades escondidas:</label>
                 <input v-model="hiddenUnits" v-bind:disabled="!!trainState" type="number" min="1" required>

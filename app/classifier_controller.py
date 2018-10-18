@@ -66,7 +66,7 @@ class ClassifierController(AppController):
                     'filters_size': self.filters_size,
                     'num_labels': int(num_labels)
                 }
-                instance = self.builder[arch].restore(hyperparams)
+                instance = self.builders[arch].restore(hyperparams)
                 instance.sentiment = types.MethodType(self.sentiment[int(num_labels)], instance)
                 self.instance_stack.push(instance)
             else:

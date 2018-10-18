@@ -8,7 +8,7 @@ class AppController(ABC):
     sentence_length = 100
     filters_size = [(3, 96), (5, 96), (7, 64)]
     (_, word_dimension) = WordEmbedding.get_instance()
-    builder = {
+    builders = {
         'kim': KimSCANNBuilder.get_instance(),
         'evolved': EvolvedCANNBuilder.get_instance()
     }

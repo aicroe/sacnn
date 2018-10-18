@@ -4,6 +4,7 @@ window.onload = function () {
     data: {
       arch: 'kim',
       instanceName: '',
+      iterator: 'simple',
       hiddenUnits: 64,
       numLabels: 3,
       learningRate: 0.001,
@@ -42,6 +43,7 @@ window.onload = function () {
         body: JSON.stringify({
           arch: this.arch,
           name: this.instanceName,
+          iterator: this.iterator,
           hidden_units: this.hiddenUnits,
           num_labels: this.numLabels,
           learning_rate: this.learningRate,

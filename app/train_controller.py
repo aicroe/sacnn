@@ -1,6 +1,7 @@
 from lib.sacnn_builders.sacnn_validator import SACNNValidator
 from lib.data_saver import DataSaver
 from lib.train_iterators.early_stop_iterator import EarlyStopIterator
+from lib.train_iterators.simple_iterator import SimpleIterator
 from .app_state import AppState
 from .app_controller import AppController
 import matplotlib
@@ -48,6 +49,7 @@ def create_train_callback(instance_state, epochs):
         print(epoch, minibatch_accuarcy, minibatch_cost, val_accuracy, val_cost)
         instance_state.state = 'training'
         instance_state.epoch = epoch
+
     return train_callback
 
 
@@ -59,6 +61,10 @@ class TrainController(AppController):
         """
         self.app_state = app_state
         self.training_instances = {}
+        self.iterators = {
+            'simple': SimpleIterator.get_instance(),
+            'early_stop': EarlyStopIterator(5)
+        }
 
     def get_training_state(self, name):
         return self.training_instances[name]
@@ -68,13 +74,14 @@ class TrainController(AppController):
         :param dict hyperparams:
         """
 
-        SACNNValidator.validate(['arch', 'name', 'epochs'], hyperparams)
+        SACNNValidator.validate(['arch', 'name', 'iterator', 'epochs'], hyperparams)
 
         hyperparams['sentence_length'] = self.sentence_length
         hyperparams['word_dimension'] = self.word_dimension
         hyperparams['filters_size'] = self.filters_size
 
-        builder = self.builder[hyperparams['arch']]
+        builder = self.builders[hyperparams['arch']]
+        iterator = self.iterators[hyperparams['iterator']]
         name = hyperparams['name']
         self.app_state.record_instance(name,
                                        hyperparams.get('hidden_units', 0),
@@ -91,7 +98,7 @@ class TrainController(AppController):
              val_costs,
              test_cost,
              test_accuracy,
-             confusion_matrix) = builder.train(hyperparams, callback, EarlyStopIterator())
+             confusion_matrix) = builder.train(hyperparams, callback, iterator)
         except BaseException as exception:
             print(exception)
             self.app_state.remove_instance(hyperparams['name'])
