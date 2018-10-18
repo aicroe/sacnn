@@ -37,5 +37,4 @@ class EarlyStopIterator(TrainIterator):
 
         if iterations_failing >= self.patience and epoch < epochs:
             print('Early stop performed at epoch %d' % epoch)
-            epoch_callback(epochs, None, None, None, None)
         return epoch, costs, val_costs
