@@ -34,7 +34,7 @@ def epoch_callback(epoch,
     print('val accuracy      : %f' % val_accuracy)
     print('val cost          : %f' % val_cost)
 
-
+results_summary = [('name', 'arch', 'iterator', 'epochs', 'accuracy')]
 for hyperparams in hyperparams_list:
     name = hyperparams['name']
     arch = hyperparams['arch']
@@ -73,3 +73,8 @@ for hyperparams in hyperparams_list:
     print('confusion matrix:\n', confusion_matrix)
     print('confision matrix accuracy:', confusion_matrix_helper.accuracy(confusion_matrix))
     print('------ FINISH training: %s -------' % name)
+    results_summary.append((name, arch, iterator, iterations, test_accuracy))
+
+print('------ Train Summary ------')
+for (name, arch, iterator, iterations, test_accuracy) in results_summary:
+    print(name, arch, iterator, iterations, test_accuracy)
