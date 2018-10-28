@@ -4,6 +4,8 @@ Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the embe
 
 ## Setup
 
+**Required python 3.6 or higher.**
+
 ### Install dependencies
 ```bash
 pip install -r requeriments.txt
@@ -34,7 +36,7 @@ In order to decrease the number of labels since the raw data has 5 classes, this
 
 ## Batch training and evaluation
 
-### Training
+### Train
 
 The file **hyperparams_list.py** contains the configuration of a list of models to be trained. The script **train.py** will read the hyperparams file and train each one of the models described there.
 
@@ -42,7 +44,12 @@ The file **hyperparams_list.py** contains the configuration of a list of models 
 $ python train.py
 ```
 
-This reads the data saved previously at **~/.sacnn/data**. The trained networks will be saved at **~/.sacnn/\<model-name\>**.
+This reads the data saved previously at **~/.sacnn/data**. The trained networks will be saved at **~/.sacnn/\<arch-name\>**.
+
+If you wish to save the logs you may want to try this sentence instead.
+```bash
+$ python train.py > train-$(date +%Y%m%d%H%M).log
+```
 
 ### Evaluate
 
@@ -52,7 +59,7 @@ It is posible to run the evaluation of the models after they were trained. The s
 $ python eval.py
 ```
 
-## The app
+## Web App
 
 The preprocess data stage must be done before in order this to work.
 
@@ -62,14 +69,14 @@ You can easly up the app running the **server.py** script.
 $ python server.py
 ```
 
-Or build and run the docker container.
+Or build and run the image in an docker container.
 ```bash
-# Build
+# Build the image
 $ docker build . -t sacnn:1.0
 ```
 
 ```bash
-# Run the container
+# Run the image on a container
 $ docker run -p 5000:80 --mount type=bind,source=$HOME/.sacnn,target=/root/.sacnn scann
 ```
 
@@ -79,7 +86,7 @@ For develop you may want to bind the source code to the container too.
 $ docker run -p 5000:5000 --mount type=bind,source=$HOME/.sacnn,target=/root/.sacnn --mount type=bind,source="$(pwd)",target=/src sacnn:1.0
 ```
 
-Once the image is built you could run the app using **docker-compose**.
+Once the image is built you could just run the app using **docker-compose**.
 ```bash
 # Run using docker-compose
 $ docker-compose up
