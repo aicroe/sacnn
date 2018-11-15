@@ -34,13 +34,14 @@ def epoch_callback(epoch,
     print('val accuracy      : %f' % val_accuracy)
     print('val cost          : %f' % val_cost)
 
-results_summary = [('name', 'arch', 'iterator', 'epochs', 'learning_rate', 'accuracy')]
+results_summary = [('name', 'arch', 'iterator', 'epochs', 'learning_rate', 'convs_parallel', 'accuracy')]
 for hyperparams in hyperparams_list:
     name = hyperparams['name']
     arch = hyperparams['arch']
     iterator = hyperparams['iterator']
     epoch_print_cost = hyperparams['epoch_print_cost']
     learning_rate = hyperparams['learning_rate']
+    convs_parallel = len(hyperparams['filters_size'])
 
     print('------ START training: %s -------' % name)
     (_,
@@ -73,8 +74,8 @@ for hyperparams in hyperparams_list:
     print('confusion matrix:\n', confusion_matrix)
     print('confision matrix accuracy:', confusion_matrix_helper.accuracy(confusion_matrix))
     print('------ FINISH training: %s -------' % name)
-    results_summary.append((name, arch, iterator, iterations, learning_rate, test_accuracy))
+    results_summary.append((name, arch, iterator, iterations, learning_rate, convs_parallel, test_accuracy))
 
 print('------ Train Summary ------')
-for (name, arch, iterator, iterations, learning_rate, test_accuracy) in results_summary:
-    print(name, arch, iterator, iterations, learning_rate, test_accuracy)
+for result_summary in results_summary:
+    print(str.join(',', map(str, result_summary)))
