@@ -47,7 +47,7 @@ def _main():
     raw_labels = [1, 2, 3, 4, 5]
 
     print('Loading embedding')
-    embedding, _ = WordEmbedding.get_instance()
+    embedding, word_dimension = WordEmbedding.get_instance(limit=None)
     print('Loading comments')
     comments_frame = load_comments(str(DataSaver.prepare_dir('raw').joinpath('comments.csv')))
     samples_count, _ = comments_frame.shape
@@ -57,7 +57,7 @@ def _main():
 
     print('Processing comments')
     print(comments_frame['fullContent'].shape)
-    data_processor = DataProcessor(embedding.wv, sentence_length, channels)
+    data_processor = DataProcessor(embedding.wv, sentence_length, word_dimension, channels)
     samples = data_processor.process(comments_frame['fullContent'])
     onehot_labels = DataProcessor.create_1hot_vectors(comments_frame['rating'], raw_labels)
 
