@@ -2,10 +2,6 @@
     font-size: x-large !important;
 }
 
-.result {
-    display: inline;
-}
-
 nav div.ui.container a.item {
     background-color: #eee;
 }
@@ -20,7 +16,7 @@ nav div.ui.container a.item.active {
 }
 
 .gray {
-    color: rgba(34, 36, 38, 0.15);
+    color: gray;
 }
 
 .red {
@@ -30,6 +26,7 @@ nav div.ui.container a.item.active {
 .result.text {
     color: rgba(0,0,0,.87);
     font-weight: 700;
+    font-size: 1.5rem;
 }
 
 .ui.segment {

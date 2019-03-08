@@ -6,7 +6,10 @@ Vue.component('comment-input', {
         v-if="!!comment.result"
         class="two wide field"
       >
-        <h2 class="result">{{comment.result}}</h2>
+        <div class="one column grid">
+          <div class="column result text">{{ comment.result.sentiment }}</div>
+          <div class="column gray">({{ comment.result.probability | truncate }} %)</div>
+        </div>
       </div>
       <div
         class="fourteen wide field"
@@ -36,5 +39,10 @@ Vue.component('comment-input', {
       event.preventDefault();
       this.$emit('action', this.index);
     }
-  }
+  },
+  filters: {
+    truncate(number, radius=2) {
+      return (+number).toFixed(radius);
+    }
+  },
 });

@@ -17,7 +17,12 @@ def sentiment_factory(sentiment_map):
         :param SACNN self:
         :param numpy input_data:
         """
-        return list(map(lambda evaluation: sentiment_map[evaluation], self.evaluate(input_data)))
+        return list(
+            map(lambda evaluation: {
+                'sentiment': sentiment_map[evaluation[0]],
+                'probability': str(evaluation[1] * 100),
+            }, self.evaluate(input_data))
+        )
     return evaluate
 
 

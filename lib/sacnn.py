@@ -112,7 +112,8 @@ class SACNN(object):
             self.arch.keep_prob: 1
         }
         predictions = self.arch.prediction.eval(session=self.session, feed_dict=eval_dict)
-        return np.argmax(predictions, axis=1) + 1
+        max_indexes = np.argmax(predictions, axis=1)
+        return zip(max_indexes + 1, predictions[range(predictions.shape[0]), max_indexes])
 
     def save(self):
         return self.arch.save(self.session, self.name)
