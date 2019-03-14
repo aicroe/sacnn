@@ -30,13 +30,13 @@ class ClassifierController(AppController):
     sentiment = {
         3: sentiment_factory({
             1: 'Negativo',
-            2: 'Regular',
+            2: 'Neutral',
             3: 'Positivo'
         }),
         5: sentiment_factory({
             1: 'Terrible',
             2: 'Malo',
-            3: 'Regular',
+            3: 'Neutral',
             4: 'Bueno',
             5: 'Excelente'
         })
