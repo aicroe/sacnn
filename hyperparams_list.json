@@ -1,0 +1,52 @@
+[
+    {
+        "name": "kim",
+        "arch": "kim",
+        "trainer": "early_stop",
+        "learning_rate": 0.009,
+        "epochs": 200,
+        "validation_gap": 5,
+        "minibatch_size": 32,
+        "keep_prob": 0.5,
+        "filters": [[3, 64]],
+        "num_labels": 3
+    },
+    {
+        "name": "kim+1FC",
+        "arch": "kim1fc",
+        "trainer": "early_stop",
+        "learning_rate": 0.009,
+        "epochs": 300,
+        "validation_gap": 5,
+        "minibatch_size": 32,
+        "keep_prob": 0.5,
+        "filters": [[4, 64]],
+        "hidden_units": 128,
+        "num_labels": 3
+    },
+    {
+        "name": "kim+PC",
+        "arch": "kimpc",
+        "trainer": "early_stop",
+        "learning_rate": 0.009,
+        "epochs": 300,
+        "validation_gap": 5,
+        "minibatch_size": 32,
+        "keep_prob": 0.5,
+        "filters": [[3, 96], [5, 128]],
+        "num_labels": 3
+    },
+    {
+        "name": "kim+PC+1FC",
+        "arch": "kim1fcpc",
+        "trainer": "early_stop",
+        "learning_rate": 0.009,
+        "epochs": 300,
+        "validation_gap": 5,
+        "minibatch_size": 32,
+        "keep_prob": 0.5,
+        "filters": [[6, 32], [7, 128]],
+        "hidden_units": 128,
+        "num_labels": 3
+    }
+]

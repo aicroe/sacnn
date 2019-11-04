@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <script src="/static/classifier.js" type="module"></script>
+{% endblock %}
+{% block content %}
+    <div id="classifier" class="ui segment">
+        <form class="ui form">
+            <div class="inline fields">
+                <div class="fourteen wide field">
+                    <label>Elige la instancia:</label>
+                    <select
+                        v-model="instanceName"
+                        v-bind:class="{ 'error border': errorText }">
+                        {% for name in instance_names -%}
+                            <option value="{{ name }}">{{ name }}</option>
+                        {%- endfor %}
+                    </select>
+                </div>
+                <div class="two wide field">
+                    <button
+                        class="ui secondary button"
+                        v-on:click="reset"
+                    >
+                        Reiniciar
+                    </button>
+                </div>
+            </div>
+            <comment-input
+                v-bind:comment="newComment"
+                v-on:action="addNewComment"
+                action-label="+"
+                v-bind:enabled="true"
+                v-bind:error="!!errorText"
+            ></comment-input>
+            <comment-input
+                v-for="(comment, index) in comments"
+                v-bind:key="index"
+                v-bind:index="index"
+                v-bind:comment="comment"
+                v-on:action="removeComment"
+                action-label="-"
+                v-bind:enabled="false"
+            ></comment-input>
+            <div class="field">
+                <input
+                    class="ui primary button full width"
+                    type="submit"
+                    value="Clasificar"
+                    v-on:click="classifyComment"
+                />
+                <p class="red" v-html="errorText"></p>
+            </div>
+        </form>
+    </div>
+{% endblock %}

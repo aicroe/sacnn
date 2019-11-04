@@ -1,5 +1,21 @@
-__pycache__
-*.pyc
-.vscode
-.idea
-env.sh
+.vscode/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info
+*.eggs
+
+# C extensions
+*.so
+
+# Distribution / packaging
+dist/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environments
+python3/
