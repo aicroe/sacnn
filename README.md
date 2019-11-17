@@ -78,7 +78,7 @@ It is recommended to have this configuration in a `.json` file and pass it to th
 
 The way the configuration file should be arranged is the next:
 
-```json
+```jsonc
 [
   {
     "name": "<string>", // instance's name identifier
