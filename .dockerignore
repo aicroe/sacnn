@@ -1,0 +1,14 @@
+.git
+.vscode/
+
+python3/
+docs/
+
+hyperparams_list.json
+docker-compose.yml
+
+dist/
+__pycache__/
+*$py.class
+*.egg-info
+*.eggs

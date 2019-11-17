@@ -1,9 +1,16 @@
-FROM tensorflow/tensorflow:latest-py3
+FROM tensorflow/tensorflow:1.15.0-py3
 
-WORKDIR /src
-COPY . /src
-RUN pip install -r requeriments.txt
+WORKDIR /sacnn
+COPY . /sacnn
 
-EXPOSE 80
+# Workaround to https://github.com/boto/botocore/issues/1872
+RUN pip install "python-dateutil<2.8.1"
 
-CMD ["python", "server.py"]
+RUN pip install -r requirements.txt
+RUN python setup.py install
+
+EXPOSE 5000
+
+ENV FLASK_ENV production
+
+CMD ["sacnn_server"]

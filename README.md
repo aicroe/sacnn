@@ -1,66 +1,82 @@
 # a Sentiment Analysis Convolutional Neural Network
 
-Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the embeddings from [Cristian Cardellino 2016](http://crscardellino.me/SBWCE/)
+Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the word embeddings from [Cristian Cardellino 2016](http://crscardellino.me/SBWCE/)
 
 ## Setup
 
-**Required python 3.6 or higher.**
+Required python 3.6 or higher. Unix based environment recommended.
 
-* Clone the project
-* Create a virtual environment:
+### Steps
+
+* Clone the repository
+* Place the raws
+
+The data (word embedding and comments data set) must be placed at the folder **~/.sacnn/raw**, if it doesn't exists create it.
+
+It is expected a file called **comments.csv** which would contain the whole labeled data set, and a binary that holds the embeddings **SBW-vectors-300-min5.bin**.
+
+**For production**
+
+* Install the dependencies
+```bash
+$ pip install -r requirements.txt
+```
+
+* Run the install script
+```bash
+$ python setup.py install
+```
+
+This installs the project (along with its dependencies) and exposes a couple of scripts that would be available from the command line interface.
+
+**For development**
+
+* Create a dedicated virtual environment:
 
 ```bash
-cd sacnn/
-python3 -m venv python3
-source python3/bin/activate
+$ cd sacnn/
+$ python3 -m venv python3
+$ source python3/bin/activate
 ```
 
 * Install for development
 ```bash
-python setup.py develop
+$ python setup.py develop
 ```
 
-* Install for production?
-```bash
-python setup.py install
-```
+**Troubleshooting**
 
-This will install the project in a way that would let execute the project's command line scripts as a regular console program. The last script though would need special considerations, there is a different recommended way to execute it (TODO: add these steps).
-
-**Place the raws.**
-
-Place the data at the folder **~/.sacnn/raw**, if doesn't exists create it.
-It is expected a file called **comments.csv** which would contain the whole labeled data set, and a binary that holds the embeddings **SBW-vectors-300-min5.bin**.
+Due the complexity of some libraries this project relies on, the automatic dependency installation through `setup.py` script is weak. That's why it is recommended to set up the dependencies via `pip install` first, but even that could fail on different python versions. If you encounter problems during installation, you may need to manually install the libraries in conflict.
 
 ## Command Line Scripts
 
-When the project is installed, some scripts will become available in the system command line:
+When the project is installed, some scripts will become available from the command line interface:
 
 **Process the data set**
 
-Process and store the samples from **comments.csv** in a format easier to use for Machine Learning algorithms.
+Reads and processes the samples from **comments.csv**, then saves it in a format propitious to feed a Machine Learning algorithm.
 
 ```bash
 $ sacnn_process_data
 ```
 
-It will place the train, validation and test data sets at the folder **~/.sacnn/data**.
+It will place the *train*, *validation* and *test* data sets at **~/.sacnn/data**.
 
-Optionally, after the previous script run, the next can be used to re-process the data in order to have sets with a slightly different configuration (it can be used to train a wider range of models):
+Optionally, after the previous script run, the next can be used to re-process the data in order to build new data sets with a slightly different configuration (this can be used to train a wider range of models):
 
 ```bash
 $ sacnn_reduce_labels
 ```
 
-Reduces the data labels number from 5 to 3. The data will be saved at  **~/.sacnn/data\_reduced**.
+Reduces the data labels range from 5 to 3. The new sets will be saved at  **~/.sacnn/data\_reduced**.
 
 **Training**
 
-The train script, same as the previous two, would be available in the command line after installation. This script reads a number of model configurations (hyper-parameters) in a json format from the standard input in order to build, train, measure and save said models.
+The train script, same as the previous two, would be available from the command line after installation. This script reads several model configurations (hyper-parameters) in a json format from the standard input in order to *build*, *train*, *measure* and *save* said models.
 
-It is recommended to have this configuration in a `.json` file and pass it to the train script through the redirection operator `<`.
+It is recommended to have this configuration in a `.json` file and pass it to the train script with the redirection operator `<`.
 
-The way the needed configuration data should be arranged in a json file is the next:
+The way the configuration file should be arranged is the next:
 
 ```json
 [
@@ -80,15 +96,15 @@ The way the needed configuration data should be arranged in a json file is the n
 ]
 ```
 
-Suppose the configuration is saved in file called `hyperparams_list.json`, the next sentence should do the work.
+Suppose the configuration is saved in file called `hyperparams_list.json`, the next sentence should do the job.
 
 ```bash
 $ sacnn_train < hyperparams_list.json
 ```
 
-It will read the previously saved data at **~/.sacnn/\<data|data_reduced\>** in order to train the models according to each configuration. The trained models will be saved at **~/.sacnn/\<arch-name\>**.
+It will read the previously saved data at **~/.sacnn/\<data|data_reduced\>** in order to train the models, according to each configuration. The trained models will be saved at **~/.sacnn/\<arch-name\>**.
 
-If you wish to save the logs, you may want to try this sentence instead.
+If you wish to save the logs, you may want to run this sentence instead.
 
 ```bash
 $ sacnn_train < hyperparams_list.json > train-$(date +%Y%m%d%H%M).log
@@ -96,41 +112,34 @@ $ sacnn_train < hyperparams_list.json > train-$(date +%Y%m%d%H%M).log
 
 **Evaluation**
 
-It is possible to run a number of additional measures after after the models were trained. This script will read the models configuration, the same way as the previous training script, and restore each one of them to run the evaluation (again supposing the configuration is saved in a file called `hyperparams_list.json`).
+It is possible to run additional measures after the models were trained. This script can read the models configuration, the same way as the previous script. It restores each trained model to run an evaluation (the next supposes the configuration is saved in a file called `hyperparams_list.json`).
 
 ```bash
 $ sacnn_eval < hyperparams_list.json
 ```
 
-## Service and Web UI
+## Web App
 
-This project is bundled with a web application that allows to train and test the models this work exposes through a simple web interface backed by a custom service.
+The project is bundled with a web application that allows train and test the models this work exposes, through a web client supported by a custom server.
 
-TODO: The next is un-accurate information, it needs to be updated
+Note: Data preprocessing must be done beforehand in order this to work.
 
-The preprocess data stage must be done before in order this to work.
-
-You can easily up the app running the **server.py** script.
+Once the project is set up, you can easily start the app by running the server's script.
 
 ```bash
-$ python server.py
+$ sacnn_server
 ```
 
-Or build and run the image in an docker container.
+Or build a the docker image and then run it.
 ```bash
 # Build the image
+$ cd sacnn/
 $ docker build . -t sacnn:1.0
 ```
 
 ```bash
 # Run the image on a container
-$ docker run -p 5000:80 --mount type=bind,source=$HOME/.sacnn,target=/root/.sacnn scann
-```
-
-For develop you may want to bind the source code to the container too.
-```bash
-# Bind the source code
-$ docker run -p 5000:5000 --mount type=bind,source=$HOME/.sacnn,target=/root/.sacnn --mount type=bind,source="$(pwd)",target=/src sacnn:1.0
+$ docker run -p 5000:5000 --mount type=bind,source=$HOME/.sacnn,target=/root/.sacnn sacnn:1.0
 ```
 
 Once the image is built you could just run the app using **docker-compose**.
