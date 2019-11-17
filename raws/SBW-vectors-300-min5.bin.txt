@@ -1,0 +1,1 @@
+Download the word vector's binary from https://crscardellino.github.io/SBWCE/, decompress it, and name it "SBW-vectors-300-min5.bin" (if it's not already).

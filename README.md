@@ -1,6 +1,6 @@
 # a Sentiment Analysis Convolutional Neural Network
 
-Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the word embeddings from [Cristian Cardellino 2016](http://crscardellino.me/SBWCE/)
+Based on [Kim Yoon 2014](https://github.com/yoonkim/CNN_sentence) using the word embeddings from [Cristian Cardellino 2019](https://crscardellino.github.io/SBWCE/)
 
 ## Setup
 
@@ -13,7 +13,7 @@ Required python 3.6 or higher. Unix based environment recommended.
 
 The data (word embedding and comments data set) must be placed at the folder **~/.sacnn/raw**, if it doesn't exists create it.
 
-It is expected a file called **comments.csv** which would contain the whole labeled data set, and a binary that holds the embeddings **SBW-vectors-300-min5.bin**.
+It is expected a file called **comments.csv** which would contain the whole labeled data set, and a binary that holds the embeddings **SBW-vectors-300-min5.bin**. Look at the **raws/** folder on this repository in order to get those files.
 
 **For production**
 
