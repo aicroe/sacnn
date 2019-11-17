@@ -1,4 +1,9 @@
+import io
+
 from setuptools import setup, find_packages
+
+with io.open('requirements.txt', 'rt', encoding='utf8') as file:
+    install_requires = file.read()
 
 setup(
     name='sacnn',
@@ -18,18 +23,14 @@ setup(
     ],
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    include_package_data=False,
+    include_package_data=True,
     python_requires='>=3.6',
     install_requires=[
-        'numpy',
-        'tensorflow',
-        'matplotlib',
-        'pandas',
-        'gensim',
-        'flask',
+        *install_requires.split(),
+        'mlscratch'
     ],
     dependency_links=[
-        'git+git@github.com:aicroe/mlscratch.git@master#egg=mlscratch'
+        'https://github.com/aicroe/mlscratch/tarball/master#egg=mlscratch',
     ],
     zip_safe=False,
     entry_points={
